@@ -253,37 +253,6 @@ class Shemat_file:
             return None
         return data
     
-    def get_bcs_old(self):
-        """get dirichlet boundary conditions; these are stored in .nml file as:
-        - conc: negative PRES values
-        - temp: negative POR values
-        - head: neagitve PERM values
-        store in self.diri_temp, self.diri_conc, self.diri_head variables"""
-        # initialize object variables
-        print "get BCs and store in object variables"
-        self.diri_conc = []
-        self.diri_temp = []
-        self.diri_head = []
-        print "read concentration boundary conditions"
-        for i in self.get_array("PRES"):
-            if i < 0:
-                self.diri_conc.append(True)
-            else:
-                self.diri_conc.append(False)
-        print "read temperature boundary conditions"
-        for i in self.get_array("POR"):    
-            if i < 0:
-                self.diri_temp.append(True)
-            else:
-                self.diri_temp.append(False)
-        print "read hydraulic head boundary conditions"
-        for i in self.get_array("PERM"):    
-            if i < 0:
-                self.diri_head.append(True)
-            else:
-                self.diri_head.append(False)
-        return True
-
     
     def get_bcs(self):
         """get dirichlet boundary conditions; these are stored in .nml file as:
@@ -947,35 +916,6 @@ class Shemat_file:
                 temp_xy.append(meantemp)             
         return temp_xy
     
-    def calc_mean_formation_value_old(self, formation_id, property):
-        """calculate mean value for one property at one location
-        formation_id : corresponding to the property id in Shemat/ Geology Variable
-        property : can be any of the properties in the SHEMAT nml/nlo files, e.g.: DICHTE, PERM, POR
-        returns list mean_value[x][y]
-        """
-        # load geology data to xyz array
-        geology_xyz = self.get_array_as_xyz_structure("GEOLOGY")
-        property_xyz = self.get_array_as_xyz_structure(property)
-        idim = int(self.get("IDIM"))
-        jdim = int(self.get("JDIM"))
-        kdim = int(self.get("KDIM"))
-        # now, iterate over x,y in geology array
-        property_xy = []
-        for j in range(jdim):
-            for i in range(idim):
-                local_property = 0
-                n = 0
-                for k in range(kdim):
-                    if geology_xyz[i][j][k] == formation_id:
-                        local_property += property_xyz[i][j][k]
-                        n += 1
-                if n != 0:
-                    property = local_property / n
-                else:
-                    property = 0
-                property_xy.append(property)             
-        return property_xy
-        
     def create_property_histogram(self, formation_id, property, **kwds):
         """create a histogram for a defined property, e.g.: histogram for
         temperature values of formation 1
