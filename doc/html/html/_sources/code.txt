@@ -1,0 +1,15 @@
+Documentation for PySHEMAT
+**************************
+
+Methods to read and write simulation input and output files
+=========================
+
+.. automodule:: PySHEMAT
+
+.. autoclass:: Shemat_file
+   :members:
+
+Methods to read monitoring files for transient simulations
+=========================
+
+Documentation will be added soon.

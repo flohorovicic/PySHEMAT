@@ -1,0 +1,955 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Documentation for PySHEMAT &mdash; PySHEMAT_doc v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PySHEMAT_doc v1.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">PySHEMAT_doc v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="documentation-for-pyshemat">
+<h1>Documentation for PySHEMAT<a class="headerlink" href="#documentation-for-pyshemat" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="methods-to-read-and-write-simulation-input-and-output-files">
+<h2>Methods to read and write simulation input and output files<a class="headerlink" href="#methods-to-read-and-write-simulation-input-and-output-files" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-PySHEMAT"></span><p>PySHEMAT is a free set of Python modules to create and process input
+files for fluid and heat flow simulation with SHEMAT (<a class="reference external" href="http://137.226.107.10/aw/cms/website/zielgruppen/gge/research_gge/~uuv/Shemat/?lang=de">http://137.226.107.10/aw/cms/website/zielgruppen/gge/research_gge/~uuv/Shemat/?lang=de</a>)</p>
+<p>PySHEMAT is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">PySHEMAT is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</p>
+</div>
+<p>You should have received a copy of the GNU General Public License along with PySHEMAT.  If not, see &lt;<a class="reference external" href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.</p>
+<p>For module, update and documentation of PySHEMAT please see:
+<a class="reference external" href="https://github.com/flohorovicic/PySHEMAT">https://github.com/flohorovicic/PySHEMAT</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you use PySHEMAT for a scientific study, please cite our publication in Computers and Geosciences</p>
+</div>
+<dl class="class">
+<dt id="PySHEMAT.Shemat_file">
+<em class="property">class </em><tt class="descclassname">PySHEMAT.</tt><tt class="descname">Shemat_file</tt><big>(</big><em>filename=''</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for SHEMAT simulation input and output files</p>
+<blockquote>
+<div>Object definition for SHEMAT simulation files. The Object
+can be used for simulation input files (.nml) and output files (.nlo).
+Object methods enable a direct access of all variables and parameters
+defined in the input file. Further methods are available for a
+simplified generation of result plots in 2-D sections and to export simulation
+results in a variety of different formats.</div></blockquote>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><blockquote class="first">
+<div><ul class="simple">
+<li><em>new_filename</em> = string: filename in case an empty file is created</li>
+</ul>
+</div></blockquote>
+<dl class="last docutils">
+<dt><strong>Optional keywords</strong>:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>offscreen</em> = True/False: set variables for offscreen rendering, e.g. to create plots on</dt>
+<dd><p class="first last">a remote machine via ssh</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.adjust_ctl_file">
+<tt class="descname">adjust_ctl_file</tt><big>(</big><em>old_filename</em>, <em>new_filename</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.adjust_ctl_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust an existing SHEMAT control file with a new filename</p>
+<blockquote>
+<div>SHEMAT control files (.ctl) are required to run a SHEMAT simulation
+from the command line. This function changes the filename settings
+within a control file in the current directory from old_filename to 
+new_filename.</div></blockquote>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><blockquote class="first">
+<div><ul class="simple">
+<li><em>old_filename</em> = string: filename of original SHEMAT file in directory</li>
+<li><em>new_filename</em> = string: filename of new SHEMAT file</li>
+</ul>
+</div></blockquote>
+<dl class="last docutils">
+<dt><strong>Optional keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>backup</em> = False/ True: create shemat_ctl.bak backup file, default true</li>
+<li><em>ctl_filename</em> = &#8220;shemat.ctl&#8221; : set other ctl filename</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.array_to_xyz_structure">
+<tt class="descname">array_to_xyz_structure</tt><big>(</big><em>array</em>, <em>idim</em>, <em>jdim</em>, <em>kdim</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.array_to_xyz_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>restructure array into x,y,z 3-D structure as data[i][j][k]</p>
+<p>with i,j,k: counters in x,y,z direction</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>array</em>: array to be restructured</li>
+<li><em>idim</em> = int : dimension of new array in x-direction (default: model dimensions)</li>
+<li><em>jdim</em> = int : dimension of new array in y-dircetion</li>
+<li><em>kdim</em> = int : dimension of new array in z-direction</li>
+</ul>
+</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd>Restructured 3-D list of data values</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.array_to_xyz_structure_object">
+<tt class="descname">array_to_xyz_structure_object</tt><big>(</big><em>array</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.array_to_xyz_structure_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>restructure array into x,y,z 3-D structure as data[i][j][k]</p>
+<p>i,j,k are counters in x,y,z-direction, determined from the object itself</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li>array = list or array to be restructured</li>
+</ul>
+</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd>Restructured 3-D list of data values</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.assign_new_unit_to_layers">
+<tt class="descname">assign_new_unit_to_layers</tt><big>(</big><em>n_layers</em>, <em>start=0</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.assign_new_unit_to_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>assign a new geological unit to one or more layers, e.g. to create a 
+thermal equilibrium layer at the bottom of the model;
+start = int : start from this layer, default=0: at bottom of model
+n_layers = int : number of layers with new geological unit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.assign_temperatures_function">
+<tt class="descname">assign_temperatures_function</tt><big>(</big><em>a</em>, <em>b</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.assign_temperatures_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign initial temperatures as a linear function of 
+altitude; function: ax + b
+a = float : gradient
+b = float : y-axis intercept
+assigns all valus to initial temperatures; &#8220;Air&#8221;-values can then
+be fixed with self.fix_const_bc_for_one_formation
+optional keywords:
+min_alt = float : minimum altitude to assign temperature function
+relative = float : calculate values relative to model origin (in model</p>
+<blockquote>
+<div>coordinate system)</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.assign_xy_values_from_grid">
+<tt class="descname">assign_xy_values_from_grid</tt><big>(</big><em>grid_xy</em>, <em>property</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.assign_xy_values_from_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiate temperature with values from a temperature grid, e.g.:
+from interpolated surface temperature values, with
+self.interpolate_values_on_xy_grid;
+can be assigned for the whole model, e.g. to initiate temperature values
+from a grid to all x,y coordinates, or for one property zone only, e.g.
+to allow lateral changes of porosity, etc.
+arguments:
+grid_xy = 1-D array with grid values, for example created with</p>
+<blockquote>
+<div>self.interpolate_values_on_xy_grid</div></blockquote>
+<p>property = SHEMAT variable name, e.g. &#8220;TEMP&#8221;: variable to assign interpolated values
+optional keywords:
+formation_id = int : formation id for which assignment should be performed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.assing_thermal_equil_layers">
+<tt class="descname">assing_thermal_equil_layers</tt><big>(</big><em>n</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.assing_thermal_equil_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>assing layers with high lateral thermal conductivity at base of
+model to allow for lateral equilibration of thermal heat flux;
+values for WLXANI and WLYANI are set to very high values;
+n = int : number of layers with high anisotropy
+optional keywords:
+aniso_val = float : value of anisotropy; default: 999.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.calc_block_volume">
+<tt class="descname">calc_block_volume</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_block_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute the volume of each block (important for cases of non-regular meshes!)
+store and return as self.block_volume list
+Enables, for example, the simple calculation of the total formation volume in combination
+with self.formation_masks:
+volume_3 = sum(self.formation_masks[3] * self.block_volume)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.calc_formation_isopach">
+<tt class="descname">calc_formation_isopach</tt><big>(</big><em>formation_id</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_formation_isopach" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate voxel based isopach map for a formation at all locations
+formation_id : corresponding to the property id in Shemat/ Geology Variable
+returns list isopach_xy[n]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.calc_global_mean_value">
+<tt class="descname">calc_global_mean_value</tt><big>(</big><em>property</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_global_mean_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate mean value for one property, location based; similar to
+self.calc_mean_formation_value but without formation separation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.calc_local_transmissivity">
+<tt class="descname">calc_local_transmissivity</tt><big>(</big><em>formation_id</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_local_transmissivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate transmissivity at one location for one formation/ aquifer
+formation_id : corresponding to the property id in Shemat/ Geology Variable
+returns list transmissivity_xy[x][y]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.calc_mean_formation_temp">
+<tt class="descname">calc_mean_formation_temp</tt><big>(</big><em>formation_id</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_mean_formation_temp" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate mean temperature of one formation at one location
+formation_id : corresponding to the property id in Shemat/ Geology Variable
+returns mean_temp = list (array with 2-D grid values in 1-D structure)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.calc_mean_formation_value">
+<tt class="descname">calc_mean_formation_value</tt><big>(</big><em>formation_id</em>, <em>property</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_mean_formation_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate mean value for one property, location based
+formation_id : corresponding to the property id in Shemat/ Geology Variable
+property : can be any of the properties in the SHEMAT nml/nlo files, e.g.: DICHTE, PERM, POR
+returns list mean_value[n]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.change_array_length">
+<tt class="descname">change_array_length</tt><big>(</big><em>var_name</em>, <em>length</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.change_array_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>change original array length to new length;
+<em>caution</em>: overwrites array and fills new array with value in first entry!!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.coupling_info">
+<tt class="descname">coupling_info</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.coupling_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine coupling settings</p>
+<p>Read coupling information out of variable KOPLNG and
+dechipher.</p>
+<dl class="docutils">
+<dt><strong>Returns</strong>:</dt>
+<dd>String with clear text about coupling settings</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.create_2D_property_plot">
+<tt class="descname">create_2D_property_plot</tt><big>(</big><em>property</em>, <em>interpolation='spline36'</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_2D_property_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a 2.5 D plot of a property, e.g. mean temperature calculated with
+self.calc_mean_formation_value(1,&#8221;TEMP&#8221;)
+passed array should be 1-D, reshaping done in this method (with idim, jdim)
+ATTENTION: uses matplotlib.imshow for plot, only regular mesh possible!
+standard plot: two images, 
+left image: raw data in (regular) cell structure
+right image: interpolated data (with interpolation passed as argument, see 
+matplotlib.imshow for possible values)
+optional arguments:
+title = &#8216;Title&#8217;  Main title, if not given: name of array (to be implemented, now: no title)
+xlabel = string : label of x-axis
+ylabel = string : label of y-axis
+xscale = &#8216;meter&#8217;, scale of x-axis (adjust tick labels)
+yscale = &#8216;meter&#8217;, scale of y-axis (adjust tick labels)
+colorbar = True/False : add colorbar to plot
+colorbar_label = string : label of colorbar
+colorbar_orientation = horizontal/ vertical
+two_plots = True/False : add a subplot with interpolated image
+show = True/False : show plot
+savefig = True/False : save figure to file
+filename = string : figure filename
+cmap = colormap name for image (cm.colormap)
+vmin = float : z-scale for image plot
+vmax = float
+vertical_ex = float : vertical exegeration, if set to 1: real aspect ratios</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.create_delimiter_histogram">
+<tt class="descname">create_delimiter_histogram</tt><big>(</big><em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_delimiter_histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>create histogram plots for DELX, DELY and DELZ arrays
+e.g. useful to check random grid values, etc.
+optional keywords:
+2d = True/False: consider DELY (or not)
+show = True/False: directly show plot of histogram</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.create_formation_masks">
+<tt class="descname">create_formation_masks</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_formation_masks" title="Permalink to this definition">¶</a></dt>
+<dd><p>create array masks for all geological units (from geology array) and store in self.formation_masks[id];
+also creates a list containing all formation ids of Shemat-file in self.formation_list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.create_formations_ids">
+<tt class="descname">create_formations_ids</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_formations_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>create array self.formation_ids with formation ids from geology data array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.create_indicator_functions">
+<tt class="descname">create_indicator_functions</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_indicator_functions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicator functions are defined at every voxet for each formation and = 1 if the formation
+exists at this voxet; They are essentially the same as the formation masks - method and variable name
+still included here for compatibility</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.create_property_histogram">
+<tt class="descname">create_property_histogram</tt><big>(</big><em>formation_id</em>, <em>property</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_property_histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a histogram for a defined property, e.g.: histogram for
+temperature values of formation 1
+formation_id : corresponding to the property id in Shemat/ Geology Variable
+property : can be any of the properties in the SHEMAT nml/nlo files, e.g.: DICHTE, PERM, POR
+returns figure
+optional keywords:
+show = True/False: directly show plot of histogram
+property_name = Name of property, for title of plot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.create_section_property_plot">
+<tt class="descname">create_section_property_plot</tt><big>(</big><em>property</em>, <em>interpolation='nearest'</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_section_property_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a 2D plot of a property in a section,
+for example for 2-D SHEMAT calculations within a section (VERTICAL setting, jdim=1)
+passed array should be 1-D, reshaping done in this method (with idim, kdim)
+standard plot: two images, 
+left image: raw data in (regular) cell structure
+right image: interpolated data (with interpolation passed as argument, see 
+matplotlib.imshow for possible values)
+optional arguments:
+title = &#8216;Title&#8217;  Main title, if not given: name of array (to be implemented, now: no title)
+colorbar = True/False : add colorbar to plot
+colorbar_orientation = horizontal/ vertical : orientation of colorbar
+two_plots = True/False : add a subplot with interpolated image
+show = True/False : show plot
+savefig = True/False : save figure to file
+filename = string : figure filename
+cmap = colormap name for image (cm.colormap)
+vmin = float : z-scale for image plot
+vmax = float
+aspect = float, &#8216;auto&#8217;, &#8216;equal&#8217; : define aspect ratio of plot
+contour = True/False: add contour lines</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.create_shemat_voxet_model">
+<tt class="descname">create_shemat_voxet_model</tt><big>(</big><em>property</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_shemat_voxet_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a voxet model of a property/ variable in .vtk format
+to be viewed with Mayavi;
+optional arguemnts:
+variable = variable array : use variable array instead of property
+Attention: does <em>not</em> create an interpolation between points (no .vtk point file)
+but a true representation of the voxets as a &#8220;shoe box&#8221; model!
+Only (yet) works for a regular grid with constant spacing!</p>
+<p>optional keywords:
+show = True/False : open  Mayavi and show model</p>
+<p>IDEA:
+- implement for non-regular voxet models
+- visualise voxet &#8220;refinement&#8221; as voxet &#8220;volume&#8221; property as proxy
+(lower voxet volume = higher discretization) to check refinement of models
+- save_vtk : save to vtk file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.create_slice_plot">
+<tt class="descname">create_slice_plot</tt><big>(</big><em>property</em>, <em>direction</em>, <em>position</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_slice_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a 2-D plot of a property in a slice through the model, normal to
+the specified direction and at a given position along this direction;
+property = Shemat-Variable name, e.g. &#8220;TEMP&#8221;
+direction = x,y,z : direction normal to plot
+position = float : position of plot, real-world coordinates
+optional arguments:
+title = &#8216;Title&#8217;  Main title, if not given: name of array (to be implemented, now: no title)
+colorbar = True/False : add colorbar to plot
+colorbar_orientation = horizontal/ vertical : orientation of colorbar
+two_plots = True/False : add a subplot with interpolated image
+show = True/False : show plot
+savefig = True/False : save figure to file
+filename = string : figure filename
+cmap = colormap name for image (cm.colormap)
+vmin = float : z-scale for image plot
+vmax = float
+aspect = float, &#8216;auto&#8217;, &#8216;equal&#8217; : define aspect ratio of plot
+contour = True/False: add contour lines</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.export_to_voxet_object">
+<tt class="descname">export_to_voxet_object</tt><big>(</big><em>property</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.export_to_voxet_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>export a property/ variable of the SHEMAT input or output
+file into a voxet object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.fix_const_bc_for_one_formation">
+<tt class="descname">fix_const_bc_for_one_formation</tt><big>(</big><em>bc_type</em>, <em>formation_id</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.fix_const_bc_for_one_formation" title="Permalink to this definition">¶</a></dt>
+<dd><p>fix constant value boundary condition for one formation, e.g.
+to assign a fixed temperature to all values above topography, in the
+&#8220;Air&#8221;-formation;
+bc_type = &#8216;Temp&#8217;,&#8217;Head&#8217;,&#8217;Conc&#8217; : type of BC
+formation_id = int : formation identifyer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.fixed_parameter_info">
+<tt class="descname">fixed_parameter_info</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.fixed_parameter_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine status of fixed parameters and return as string</p>
+<dl class="docutils">
+<dt><strong>Returns</strong>:</dt>
+<dd>String with clear text about fixed parameters</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get">
+<tt class="descname">get</tt><big>(</big><em>var_name</em>, <em>line=1</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the value of a scalar variable</p>
+<p>Determines the value of a scalar variable in the SHEMAT object</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>var_name</em> = string : Name of scalar variable</li>
+</ul>
+</dd>
+<dt><strong>Optional keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>line</em> = int : Number of lines for multiline variables</li>
+</ul>
+</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd>String with variable</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_array">
+<tt class="descname">get_array</tt><big>(</big><em>var_name</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the value of an array variable</p>
+<p>Array variables (e.g. temperature, pressure, etc.) in SHEMAT are stored
+in 1-D arrays in a compressed format. With this method, the variables
+are decompressed and returned as a 1-D list. The method also adjusts
+special boundary condition settings which are partly implemented as
+negative values of pressure, porosity and permeability.</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>var_name</em> = string : Name of scalar variable</li>
+</ul>
+</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd><ul class="first last simple">
+<li>1-D list with values</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_array_as_xyz_structure">
+<tt class="descname">get_array_as_xyz_structure</tt><big>(</big><em>var_name</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_array_as_xyz_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>read variable and order into 3-D structure as
+data[i][j][k]
+with i,j,k: counters in x,y,z direction
+arguments:
+var_name : property from SHEMAT file (read again in this function! rewrite?)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_bcs">
+<tt class="descname">get_bcs</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_bcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the boundary conditions and return as 1-D list</p>
+<p>Dirichlet boundary conditions are stored in a .nml file as:
+- conc: negative PRES values
+- temp: negative POR values
+- head: neagitve PERM values</p>
+<p>With this method, boundary conditions are evaluated and stored in
+object variables self.diri_temp, self.diri_conc, and self.diri_head</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_cell_boundaries">
+<tt class="descname">get_cell_boundaries</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_cell_boundaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate cell boundaries from arrays DELX, DELY, DELZ and save
+to self.boundaries_x, self.boundaries_y, self.boundaries_z</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_cell_centres">
+<tt class="descname">get_cell_centres</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_cell_centres" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate centre of cells in absolute values</p>
+<p>Cell centres are stored in object variables</p>
+<p>self.centre_x, self.centre_y, self.centre_z</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_cell_pos">
+<tt class="descname">get_cell_pos</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_cell_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>get array position of cell that contains the coordinate x,y,z
+(in real world coordinates</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_isohypse_data">
+<tt class="descname">get_isohypse_data</tt><big>(</big><em>property</em>, <em>value</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_isohypse_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>get an array of depth values for one property in the model, e.g.
+a map of depth to 100 C temperatures; The depth value is interpolated
+linearly between the two cell centres above and below the specified
+value.
+Attention: this method creates
+a &#8220;2.5-D&#8221; type map, i.e. only the first point that reaches the
+value below the surface is considered! For a true 3-D contour plot, use
+a voxet export and VTK viewer (e.g. Mayavi)!
+property = SHEMAT variable name, e.g. &#8220;TEMP&#8221;
+value = float : value
+returns 1-D array with the same structure as calculated mean temperatures,
+slice arrays (get_slice), etc. that can be plotted with
+self.create_2D_property_plot or exported to an ASCII grid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_model_extent">
+<tt class="descname">get_model_extent</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_model_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>determine model extent in x,y,z direction from self.boundaries_x,y,z
+return as tuple (extent_x, extent_y, extent_z) and store in self.extent_x, self.extent_y, self.extent_z</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_model_origin">
+<tt class="descname">get_model_origin</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_model_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>the model origin is not (or not correctly?) implemented in the
+SHEMAT nml file itself - prompt user to input, if required!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_origin">
+<tt class="descname">get_origin</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>only alias for self.get_model_origin() for consistency</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_profile_xy">
+<tt class="descname">get_profile_xy</tt><big>(</big><em>property</em>, <em>x</em>, <em>y</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_profile_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>get property profile at real-world position x,y. e.g. the temperature
+profile with depth; returns a 1-D array
+property = SHEMAT variable (e.g. &#8220;TEMP&#8221;
+x,y = float : position [m]
+optional keywords:
+relative = True/False : relative to model origin (not in real-world coordinates)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_slice">
+<tt class="descname">get_slice</tt><big>(</big><em>property</em>, <em>direction</em>, <em>position</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>get data for a property in a slice through the model, along a coordinate
+direction for a specified position;
+data is stored in a &#8220;xy&#8221;-type array, similar to calculated mean properties, etc.
+and can be plotted with self.create_2D_property_plot or exported to an ASCII
+grid file;
+property = SHEMAT variable name, e.g. &#8220;TEMP&#8221; for temperature
+direction = &#8216;x&#8217;,&#8217;y&#8217;,&#8217;z&#8217; : coordinate direction
+position = float : position of slice in real-world coordinates
+returns property_xy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.get_value_xyz">
+<tt class="descname">get_value_xyz</tt><big>(</big><em>property</em>, <em>x</em>, <em>y</em>, <em>z</em>, <em>interpolate=False</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.get_value_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the value of the property at real-world position x,y,z;
+returns float value
+property = SHEMAT variable (e.g. &#8220;TEMP&#8221;
+x,y,z = float : position [m]
+optional keywords:
+interpolated = True/ False: interpolate value between adjacent cell centres</p>
+<blockquote>
+<div>(simple linear interpolation, nothing fancy!)</div></blockquote>
+<p>relative = True/False : relative to model origin (not in real-world coordinates)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.grid_2D_to_ASCII_grid">
+<tt class="descname">grid_2D_to_ASCII_grid</tt><big>(</big><em>property_xy</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.grid_2D_to_ASCII_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>save a 2-D grid array, e.g. calculated mean temperature or
+isopach maps, to an ASCII grid file;
+returns ASCII grid object
+Attention: works only for regular (x,y) grids (due to limitations of
+ASCII grid file definition);
+property_xy = list : (1-D) list with grid values, e.g. created</p>
+<blockquote>
+<div>with self.calc_mean_formation_value</div></blockquote>
+<p>ascii_filename = string : filename of ASCII grid file (without path)
+optional keywords:
+dir = directory path to store file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.interpolate_values_on_xy_grid">
+<tt class="descname">interpolate_values_on_xy_grid</tt><big>(</big><em>x_coords</em>, <em>y_coords</em>, <em>z_values</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.interpolate_values_on_xy_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>interpolate values on a regular grid with delauny triangulation,
+for example to enable a lateral change of porosity values
+(can then be assigned to one formation) or to interpolate surface
+temperature variations (can then be used as initial temperature condition);
+x_coords = 1D-array : coordinate values in x-direction
+y_coords = 1D-array : coordinate values in y-direction
+z_values = 1D-array : values to be interpolated
+returns an array with interpolated values, similar to mean temperature and
+extracted model slice, that can then be used to plot and further processing
+of the data;
+optional keywords:
+relative = True/False : relative to model origin (not in real-world coordinates)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.mu">
+<tt class="descname">mu</tt><big>(</big><em>T</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.mu" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns dynmaic viscosity of water at a given temperature
+T : temperature in degree Celcius</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.nu_eval_holzbecher_2d">
+<tt class="descname">nu_eval_holzbecher_2d</tt><big>(</big><em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.nu_eval_holzbecher_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate nusselt number at top boundary with simple assumption from Holzbecher,
+only valid for homogeneous thermal conductivity (?!?)
+this function works only for horizontal sections (in SHEMAT) with jdim=1
+optional kwds:
+estimation=[linear, quadradic, cubic]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.property_xy_to_2D_points">
+<tt class="descname">property_xy_to_2D_points</tt><big>(</big><em>property_xy</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.property_xy_to_2D_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a list with coordinates and property values, e.g. for
+further data processing, import into MapInfo, etc.
+property_xy : list with property values, e.g. created from calc_mean_formation_value()
+up to now: only regular discretization in x- and y-direction!
+returns list property_2D_points[x_coord, y_coord, property_value]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.random_boundary_change">
+<tt class="descname">random_boundary_change</tt><big>(</big><em>sigma</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.random_boundary_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>change boundaries by random value to test influence on numerical instabilities
+optional kwds:
+max_diff = n % : maximal difference between two neigbouring cells in percent, e.g. 75% is reasonable
+two_d = True/False : for 2-D case (only x, z boundaries are changed)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.random_boundary_change_aniso">
+<tt class="descname">random_boundary_change_aniso</tt><big>(</big><em>sigma_x</em>, <em>sigma_y</em>, <em>sigma_z</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.random_boundary_change_aniso" title="Permalink to this definition">¶</a></dt>
+<dd><p>change boundaries by random value to test influence on numerical instabilities
+similar to self.random_boundary_change, but anisotropic changes possible
+optional kwds:
+max_diff = n % : maximal difference between two neigbouring cells in percent, e.g. 75% is reasonable
+two_d = True/False : for 2-D case (only x, z boundaries are changed)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.random_property_change">
+<tt class="descname">random_property_change</tt><big>(</big><em>formation_id</em>, <em>property</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.random_property_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a random value to a property of one formation
+formation_id : formation number
+property : SHEMAT property type (e.g. &#8220;PERM&#8221;)
+optional keywords:
+type = (gaussian, log, one_over_f, ...) : statistics
+sigma = float : standard deviation for the case of gaussian statistics
+(more added when required)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.read_file">
+<tt class="descname">read_file</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.read_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open and read a SHEMAT .nml or .nlo file</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><blockquote class="first">
+<div><ul class="simple">
+<li><em>filename</em> = string: filename</li>
+</ul>
+</div></blockquote>
+<dl class="last docutils">
+<dt><strong>Returns</strong>:</dt>
+<dd>List of lines in the file</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.set">
+<tt class="descname">set</tt><big>(</big><em>var_name</em>, <em>value</em>, <em>line=1</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a SHEMAT variable to a specific value</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>var_name</em> = string : name of the SHEMAT variable</li>
+<li><em>value</em> = string or number : variable value</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.set_array">
+<tt class="descname">set_array</tt><big>(</big><em>var_name</em>, <em>value_list</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.set_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a SHEMAT array variable to values in a 1-D list</p>
+<p>Set variable &#8216;var_name&#8217; with values in &#8216;value_list&#8217; in .nml_file;
+mulitpliers &#8220;*&#8221; are constructed (as used in Shemat .nml file).
+The SHEMAT boundary condition definitions are considered:
+- self.diri_conc: Dirichlet BC for concentration =&gt; PRES neg
+- self.diri_temp: Dirichlet BC for temperature =&gt; POR neg
+- self.diri_head: Dirichlet BC for hydr head =&gt; PERM neg
+these object variables/ local variables are automatically
+set if PERM, POR or PRES are set</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>var_name</em> = string : Name of SHEMAT variable</li>
+<li><em>value_list</em> = 1-D list of strings or numbers : Values</li>
+</ul>
+</dd>
+<dt><strong>Optional keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li>float_type = &#8216;high_res&#8217;, &#8216;normal&#8217; : precision of floating point; normal: 2 digits only</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.set_array_from_xyz_structure">
+<tt class="descname">set_array_from_xyz_structure</tt><big>(</big><em>var_name</em>, <em>xyz_structure_list</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.set_array_from_xyz_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a SHEMAT variable from a 3-D list of values</p>
+<p>Set variable &#8216;var_name&#8217; with values in &#8216;xyz_structure_list&#8217; in .nml_file;
+xyz_structure_list can be one of those derived from get_array_as_xyz_structure
+mulitpliers &#8220;*&#8221; are constructed (as used in Shemat .nml file)
+The SHEMAT boundary condition definitions are considered:
+- self.diri_conc: Dirichlet BC for concentration =&gt; PRES neg
+- self.diri_temp: Dirichlet BC for temperature =&gt; POR neg
+- self.diri_head: Dirichlet BC for hydr head =&gt; PERM neg
+these object variables/ local variables are automatically
+set if PERM, POR or PRES are set.</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>var_name</em> = string : Name of SHEMAT variable</li>
+<li><em>value_list</em> = 1-D list of strings or numbers : Values</li>
+</ul>
+</dd>
+<dt><strong>Optional keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li>float_type = &#8216;high_res&#8217;, &#8216;normal&#8217; : precision of floating point; normal: 2 digits only</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.set_origin">
+<tt class="descname">set_origin</tt><big>(</big><em>origin_x</em>, <em>origin_y</em>, <em>origin_z</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.set_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>set model origin; this is not (or not correctly?) implemented
+in the SHEMAT nml file itself - and only part of the class definition!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.update_del">
+<tt class="descname">update_del</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.update_del" title="Permalink to this definition">¶</a></dt>
+<dd><p>update delimitor arrays DELX, DELY, DELZ if boundaries changed
+(e.g. with random change, ...)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.update_model_from_geomodeller_xml_file">
+<tt class="descname">update_model_from_geomodeller_xml_file</tt><big>(</big><em>geomodeller_xml_file</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.update_model_from_geomodeller_xml_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the model geology from a geological model created with GeoModeller</p>
+<p>With this method, it is possible to map the distribution of geological units
+from a 3-D geological model, created with GeoModeller, on the mesh used 
+in the SHEMAT simulation. This is here done with a direct dll access to read 
+the geology data into shemat object.</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>geomodeller_xml_file</em> = string : XML file of GeoModeller project</li>
+</ul>
+</dd>
+<dt><strong>Optional keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>compute</em> = True/False: (re-) compute geological model before processing</li>
+<li><em>lower_left_x</em> = float : x-position of lower-left corner (default: model range)</li>
+<li><em>lower_left_y</em> = float : y-position of lower-left corner (default: model range)</li>
+<li><em>lower_left_z</em> = float : z-position of lower-left corner (default: model range)</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.update_model_from_voxet_file">
+<tt class="descname">update_model_from_voxet_file</tt><big>(</big><em>voxet_file</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.update_model_from_voxet_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>update shemat geology array from voxet file, exported with
+GeoModeller (Model -&gt; Export)</p>
+<p>voxet_file = filename of voxet file</p>
+<p>optional kwds:
+dir = directory path to voxet file
+geomodel_properties = property_file : property file, as used in geomodeller2shemat</p>
+<blockquote>
+<div>to use identical identifiers</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.update_properties_from_csv_list">
+<tt class="descname">update_properties_from_csv_list</tt><big>(</big><em>csv_file_name</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.update_properties_from_csv_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>update SHEMAT properties from csv file, based on property 
+distribution in GEOLOGY array;
+This function can be used
+- to populate SHEMAT input file with new parameters
+- to update SHEMAT input file when GEOLOGY array was changed
+(e.g. after update of GEOLOGY array from GeoModeller input file)
+conventions for .csv file:
+Header line neccessary, should include GEOLOGY column and one column
+for all the properties to be updated
+Header can contain a first column with Title &#8216;NAME&#8217; for name of formation (not used,
+just for better overview in .csv file)</p>
+<p>Optional property lines in .csv-file:
+PERM_FUNC: indicating that definition of permeability function in following lines
+PERM_RANDOM: indicating that definition of permeability random distribution follows</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.update_property_from_dict">
+<tt class="descname">update_property_from_dict</tt><big>(</big><em>property</em>, <em>property_dict</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.update_property_from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the value of one property according to geology id;
+properties are passed as a dictionary with assignments, e.g:
+{1 : 2.9, 2 : 3, ...} 
+property = string : property name, according to SHEMAT variable name
+property_dict = dict : assigned values; can be defined for a subset of</p>
+<blockquote>
+<div>geological units only, all not defined are not changed</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="PySHEMAT.Shemat_file.write_file">
+<tt class="descname">write_file</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.write_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write SHEMAT object to file</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first simple">
+<li><em>filename</em> = string: filename of SHEMAT file (extension .nml is</li>
+</ul>
+<p class="last">automatically assigned if not given)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="methods-to-read-monitoring-files-for-transient-simulations">
+<h2>Methods to read monitoring files for transient simulations<a class="headerlink" href="#methods-to-read-monitoring-files-for-transient-simulations" title="Permalink to this headline">¶</a></h2>
+<p>Documentation will be added soon.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation for PySHEMAT</a><ul>
+<li><a class="reference internal" href="#methods-to-read-and-write-simulation-input-and-output-files">Methods to read and write simulation input and output files</a></li>
+<li><a class="reference internal" href="#methods-to-read-monitoring-files-for-transient-simulations">Methods to read monitoring files for transient simulations</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/code.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">PySHEMAT_doc v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, J. Florian Wellmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>
