@@ -21,14 +21,32 @@ import re # for regular expression fit, neccessary for stupid nlo files
 import matplotlib as m
 
 class Shemat_file:
-    """Class for shemat model file .nml"""
+    """Class for SHEMAT simulation input and output files
+    
+    Object definition for SHEMAT simulation files. The Object
+    can be used for simulation input files (.nml) and output files (.nlo).
+    Object methods enable a direct access of all variables and parameters
+    defined in the input file. Further methods are available for a
+    simplified generation of result plots in 2-D sections and to export simulation
+    results in a variety of different formats.
+
+   **Arguments**:
+        - *new_filename* = string: filename in case an empty file is created
+    
+    **Optional keywords**:
+        - *offscreen* = True/False: set variables for offscreen rendering, e.g. to create plots on
+            a remote machine via ssh     
+    """
     # class needed? maybe good as a "containter -> might be good
     # to assure compatibility with future versions...
     def __init__(self, filename='', **kwds):
-        """read file
-        kwds:
-        new_filename = string: filename in case an empty file is created
-        offscreen = True/False: set variables for offscreen rendering, e.g. to create plots on
+        """Initialization of SHEMAT object
+        
+       **Arguments**:
+            - *new_filename* = string: filename in case an empty file is created
+        
+        **Optional keywords**:
+            - *offscreen* = True/False: set variables for offscreen rendering, e.g. to create plots on
                 a remote machine via ssh
         """
         if filename == '':
@@ -44,9 +62,14 @@ class Shemat_file:
             m.use('Agg')
                 
     def read_file(self, filename):
-        """open and read file, return list with filelines
-        either filename or projectname as argument (projectname
-        is filename without .nml)"""
+        """Open and read a SHEMAT .nml or .nlo file
+        
+       **Arguments**:
+            - *filename* = string: filename
+
+        **Returns**:
+            List of lines in the file
+        """
         try:
             file = open(filename, "r")
         except IOError, (nr, string_err):
@@ -60,9 +83,12 @@ class Shemat_file:
         return filelines
         
     def write_file(self, filename):
-        """open and write file to filename.nml
-        either filename or projectname as argument (projectname
-        is filename without .nml)"""
+        """Write SHEMAT object to file
+        
+       **Arguments**:
+            - *filename* = string: filename of SHEMAT file (extension .nml is
+            automatically assigned if not given)
+        """
         if filename[-4:] != ".nml":
             # print "Add extesion .nml to filename " + filename
             filename += ".nml"
@@ -77,13 +103,20 @@ class Shemat_file:
         file.close()
         
     def adjust_ctl_file(self, old_filename, new_filename, **kwds):
-        """adjust name in shemat.ctl file to run SHEMAT from command
-        line; shemat.ctl file has to be in same directory and already
-        exist, only shemat-filename within ctl-file is changed
-        (from old_filename to new_filename)
-        possible optional arguments:
-        backup = False/ True: create shemat_ctl.bak backup file, default true
-        ctl_filename = "shemat.ctl" : set other ctl filename
+        """Adjust an existing SHEMAT control file with a new filename
+        
+        SHEMAT control files (.ctl) are required to run a SHEMAT simulation
+        from the command line. This function changes the filename settings
+        within a control file in the current directory from old_filename to 
+        new_filename.
+        
+       **Arguments**:
+            - *old_filename* = string: filename of original SHEMAT file in directory
+            - *new_filename* = string: filename of new SHEMAT file
+        
+        **Optional keywords**:
+            - *backup* = False/ True: create shemat_ctl.bak backup file, default true
+            - *ctl_filename* = "shemat.ctl" : set other ctl filename
         """
         # check, if extension at filename
         if new_filename[-4:] != ".nml":
@@ -139,8 +172,13 @@ class Shemat_file:
         file.close()
         
     def coupling_info(self):
-        """read coupling information out of variable KOPLNG and
-        dechipher; return as string"""
+        """Determine coupling settings
+        
+        Read coupling information out of variable KOPLNG and
+        dechipher.
+        
+        **Returns**:
+            String with clear text about coupling settings"""
         coupl_str = self.get("KOPLNG")
         # dechipher
         str_out = ""
@@ -159,7 +197,11 @@ class Shemat_file:
         return str_out
     
     def fixed_parameter_info(self):
-        """return status of fixed parameters and return as string"""
+        """Determine status of fixed parameters and return as string
+        
+        **Returns**:
+            String with clear text about fixed parameters
+        """
         s = ""
         f = self.get_array("KOPPX_FLAG")
         v = self.get_array("KOPPX_FIELD")
@@ -173,25 +215,46 @@ class Shemat_file:
             
         
     def get(self, var_name, line=1):
-        """get scalar variable from .nml file; 
-        default: variabel in one line after var_name
-        if more than one line: set with argument line=n"""
+        """Get the value of a scalar variable
+        
+        Determines the value of a scalar variable in the SHEMAT object
+        
+        **Arguments**:
+            - *var_name* = string : Name of scalar variable
+            
+        **Optional keywords**:
+            - *line* = int : Number of lines for multiline variables
+            
+        **Returns**:
+            String with variable    
+        """
         for (i,l) in enumerate(self.filelines):
             if var_name in l:
-                return self.filelines[i+1]
-                break
+                if line == 1:
+                    return self.filelines[i+1]
+                    break
+                else:
+                    lines = []
+                    for j in range(line):
+                        lines.append(self.filelines[i+1])
+                    return lines
+                    break
+
         
     def get_array(self, var_name):
-        """get array variable from .nml file
-        array data with mulitplier "*" is de-constructed and everything
-        is returned as a list
-        Special consideration of boundary conditions:
-        these are implemented as:
-        - self.diri_conc: Dirichlet BC for concentration => PRES neg
-        - self.diri_temp: Dirichlet BC for temperature => POR neg
-        - self.diri_head: Dirichlet BC for hydr head => PERM neg
-        these object variables/ local variables are automatically
-        read if PERM, POR or PRES are read         
+        """Get the value of an array variable
+        
+        Array variables (e.g. temperature, pressure, etc.) in SHEMAT are stored
+        in 1-D arrays in a compressed format. With this method, the variables
+        are decompressed and returned as a 1-D list. The method also adjusts
+        special boundary condition settings which are partly implemented as
+        negative values of pressure, porosity and permeability.
+
+        **Arguments**:
+            - *var_name* = string : Name of scalar variable
+            
+        **Returns**:
+            - 1-D list with values
         """
         for (i,l) in enumerate(self.filelines):
             # Include: explicit definition of var_name to prevent double-matching
@@ -255,11 +318,15 @@ class Shemat_file:
     
     
     def get_bcs(self):
-        """get dirichlet boundary conditions; these are stored in .nml file as:
+        """Determine the boundary conditions and return as 1-D list
+        
+        Dirichlet boundary conditions are stored in a .nml file as:
         - conc: negative PRES values
         - temp: negative POR values
         - head: neagitve PERM values
-        store in self.diri_temp, self.diri_conc, self.diri_head variables"""
+        
+        With this method, boundary conditions are evaluated and stored in
+        object variables self.diri_temp, self.diri_conc, and self.diri_head"""
         # initialize object variables
         print "get BCs and store in object variables"
         self.diri_conc = []
@@ -318,27 +385,33 @@ class Shemat_file:
 
     
     def set(self, var_name, value, line=1):
-        """set variable 'var_name' with value 'value' in .nml file; 
-        default: variabel in one line after var_name
-        if more than one line: set with argument line=n"""
+        """Set a SHEMAT variable to a specific value
+        
+        **Arguments**:
+            - *var_name* = string : name of the SHEMAT variable
+            - *value* = string or number : variable value"""
         for (i,l) in enumerate(self.filelines):
             if var_name in l:
                 self.filelines[i+line] = str(value) + "\n"
 
     def set_array(self, var_name, value_list, **kwds):
-        """set variable 'var_name' with values in 'value_list' in .nml_file;
-        mulitpliers "*" are constructed (as used in Shemat .nml file)
-        Special consideration of boundary conditions:
-        these are implemented as:
-        Special consideration of boundary conditions:
-        these are implemented as:
+        """Set a SHEMAT array variable to values in a 1-D list
+        
+        Set variable 'var_name' with values in 'value_list' in .nml_file;
+        mulitpliers "*" are constructed (as used in Shemat .nml file).
+        The SHEMAT boundary condition definitions are considered:
         - self.diri_conc: Dirichlet BC for concentration => PRES neg
         - self.diri_temp: Dirichlet BC for temperature => POR neg
         - self.diri_head: Dirichlet BC for hydr head => PERM neg
         these object variables/ local variables are automatically
         set if PERM, POR or PRES are set
-        optional keywords:
-        float_type = 'high_res', 'normal' : precision of floating point; normal: 2 digits only                 
+        
+        **Arguments**:
+            - *var_name* = string : Name of SHEMAT variable
+            - *value_list* = 1-D list of strings or numbers : Values
+        
+        **Optional keywords**:
+            - float_type = 'high_res', 'normal' : precision of floating point; normal: 2 digits only                 
         """
         value = ""
         # check, if Boundary Conditions are affected
@@ -413,20 +486,24 @@ class Shemat_file:
                 self.filelines[i+1] = value + "\n"
     
     def set_array_from_xyz_structure(self,var_name, xyz_structure_list,**kwds):
-        """set variable 'var_name' with values in 'xyz_structure_list' in .nml_file;
+        """Set a SHEMAT variable from a 3-D list of values
+        
+        Set variable 'var_name' with values in 'xyz_structure_list' in .nml_file;
         xyz_structure_list can be one of those derived from get_array_as_xyz_structure
         mulitpliers "*" are constructed (as used in Shemat .nml file)
-        Special consideration of boundary conditions:
-        these are implemented as:
-        Special consideration of boundary conditions:
-        these are implemented as:
+        The SHEMAT boundary condition definitions are considered:
         - self.diri_conc: Dirichlet BC for concentration => PRES neg
         - self.diri_temp: Dirichlet BC for temperature => POR neg
         - self.diri_head: Dirichlet BC for hydr head => PERM neg
         these object variables/ local variables are automatically
-        set if PERM, POR or PRES are set                 
-        optional keywords:
-        float_type = 'high_res', 'normal' : precision of floating point; normal: 2 digits only
+        set if PERM, POR or PRES are set.
+                
+        **Arguments**:
+            - *var_name* = string : Name of SHEMAT variable
+            - *value_list* = 1-D list of strings or numbers : Values
+        
+        **Optional keywords**:
+            - float_type = 'high_res', 'normal' : precision of floating point; normal: 2 digits only                 
         """
         value = ""
         # decompose xyz-list into norma value list
@@ -499,11 +576,15 @@ class Shemat_file:
         return self.formation_ids
     
     def array_to_xyz_structure_object(self, array):
-        """restructure array into x,y,z 3-D structure as
-        data[i][j][k]
-        with i,j,k: counters in x,y,z direction
-        arguments:
-        array    : array to be restructured
+        """restructure array into x,y,z 3-D structure as data[i][j][k]
+        
+        i,j,k are counters in x,y,z-direction, determined from the object itself
+        
+        **Arguments**:
+            - array = list or array to be restructured
+        
+        **Returns**:
+            Restructured 3-D list of data values
         """
         from numpy import size
         if not (self.idim*self.jdim*self.kdim == size(array)):
@@ -532,14 +613,18 @@ class Shemat_file:
         return data
     
     def array_to_xyz_structure(self,array,idim,jdim,kdim):
-        """restructure array into x,y,z 3-D structure as
-        data[i][j][k]
+        """restructure array into x,y,z 3-D structure as data[i][j][k]
+        
         with i,j,k: counters in x,y,z direction
-        arguments:
-        array    : array to be restructured
-        idim     : dimension of new array in x-direction (default: model dimensions)
-        jdim     : dimension of new array in y-dircetion
-        kdim     : dimension of new array in z-direction
+        
+        **Arguments**:
+            - *array*: array to be restructured
+            - *idim* = int : dimension of new array in x-direction (default: model dimensions)
+            - *jdim* = int : dimension of new array in y-dircetion
+            - *kdim* = int : dimension of new array in z-direction
+
+        **Returns**:
+            Restructured 3-D list of data values
         """
         # check if array length and new dimensions are consistent
         from numpy import size
@@ -569,7 +654,12 @@ class Shemat_file:
         return data
         
     def get_cell_centres(self):
-        """calculate centre of cells in absolute values"""
+        """Calculate centre of cells in absolute values
+        
+        Cell centres are stored in object variables
+        
+        self.centre_x, self.centre_y, self.centre_z
+        """
         # reload cell boundaries
         self.get_cell_boundaries()
         # calculate centres for x
@@ -586,14 +676,25 @@ class Shemat_file:
             self.centre_z.append((self.boundaries_z[i+1]-self.boundaries_z[i])/2.+self.boundaries_z[i])
             
     def update_model_from_geomodeller_xml_file(self, geomodeller_xml_file, **kwds):
-        """use gemodeller direct dll access to directly read geology data into shemat object
-        idea: also update poro, perm, and all other parameters directly?
-        Either: evaluate from shemat-file or read from (external) parameter file?
-        optional kwds:
-        compute = True/False: (re-) compute geological model before processing
-        lower_left_x = float : x-position of lower-left corner (default: model range)
-        lower_left_y = float : y-position of lower-left corner (default: model range)
-        lower_left_z = float : z-position of lower-left corner (default: model range)
+        """Determine the model geology from a geological model created with GeoModeller
+        
+        With this method, it is possible to map the distribution of geological units
+        from a 3-D geological model, created with GeoModeller, on the mesh used 
+        in the SHEMAT simulation. This is here done with a direct dll access to read 
+        the geology data into shemat object.
+        
+        .. warning: directory path to GeoModeller bin directory has to be adjusted in code!
+        
+        **Arguments**:
+            - *geomodeller_xml_file* = string : XML file of GeoModeller project
+        
+        **Optional keywords**:
+            - *compute* = True/False: (re-) compute geological model before processing
+            - *lower_left_x* = float : x-position of lower-left corner (default: model range)
+            - *lower_left_y* = float : y-position of lower-left corner (default: model range)
+            - *lower_left_z* = float : z-position of lower-left corner (default: model range)
+        
+        .. note: for more information on GeoModeller see the `GeoModeller page <http:www.geomodeller.com\>`_
         """
         import geomodeller_api as g_api
         g_api.initialise_geomodeller_api(r'C:\Geomodeller\GeoModeller_1502\bin')
