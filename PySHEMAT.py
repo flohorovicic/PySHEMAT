@@ -13,7 +13,9 @@ You should have received a copy of the GNU General Public License along with PyT
 For module, update and documentation of PySHEMAT please see:
 https://github.com/flohorovicic/PySHEMAT
 
-If you use PySHEMAT for a scientific study, please cite our publication in Computers and Geosciences
+If you use PySHEMAT for a scientific study, please cite our publication in Computers and Geoscience:
+J. Florian Wellmann, Adrian Croucher, Klaus Regenauer-Lieb, Python scripting libraries for subsurface fluid and heat flow simulations with TOUGH2 and SHEMAT, Computers & Geosciences, 
+Available online 21 October 2011, ISSN 0098-3004, 10.1016/j.cageo.2011.10.011.
 
 """
 
@@ -64,7 +66,7 @@ class Shemat_file:
     def read_file(self, filename):
         """Open and read a SHEMAT .nml or .nlo file
         
-       **Arguments**:
+        **Arguments**:
             - *filename* = string: filename
 
         **Returns**:
@@ -2685,3 +2687,1263 @@ echo "Total simulation time [s]: $DIFF" >> time.txt
     f = open(job_filename, 'w')
     f.write(text1 + text2 + text3 + text4 + text5)
     f.close()
+
+def create_empty_model(**kwds):
+    """create a new SHEMAT model based on grid and boundary definition
+    
+    This method can be used to create a simple empty model box, defined with grid
+    spacing in each direction (dx, dy, dz) and simple boundary conditions. The new
+    model is created on basis of an nml-template file (defined in variable "lines" below).
+    This method turned out to be the simplest way to keep the input file consistent.
+    
+    The standard base model is a conductive heat transport model, with a vtk file as graphic
+    output, simulation is steady-state and no coupling is considered. All these settings can be
+    changed with optional keywords (see below).
+    
+    note: general procedure: key words are the same as those in shemat nml file (but lowercase, as python convention)
+    
+    **Optional Keywords**:
+        - dx = [] : list of spacing in x-direction
+        - dy = [] : list of spacing in y-direction
+        - dz = [] : list of spacing in z-direction
+        - title = string : set title of simluation NOTE: A SHEMAT PECULIARITY IS THAT THE TYPE OF SIM HAS TO BE DEFINED HERE!
+        - key = 12345 : problem and numerical procedure key; specifically: set as FU--- for fluid and heat flow
+        - stat = inst : if set to inst: transient simulation
+        - kopkng = (4 char word) : coupling info, specifically: C--- : coupling of fluid and heat flow
+        - topt = WSD/ TEMP/ NFLO : thermal top BC; see also: bc_temperature_base
+        - baset = WSD/ TEMP/ NFLO : thermal base BC; see also: bc_temperature_top
+        - seitet = WSD/ TEMP/ NFLO : thermal side BC (set to same value for all sides for now...); see also: bc_temperature_side
+        - transient = True/False : perform transient simulation => 10 Periods, 100 k default setting
+        - monitoring = [[i1,j1,k1],[i2,j2,k2],...,[in,jn,kn]] : list of monitoring positions
+    
+    note: the following keywords are in addition to the standard SHEMAT variables, for simplification and additional features!
+        - nml_filename = string : filename for nml file (extension .nml added as default)
+        - top_heat_flux = int : one value for heat flux assigned to all cells
+        - basal_heat_flux = int : one value for heat flux, assigned to all cells
+        - compute_heat = True/False : set flags to compute heat transport (default = True)
+        - compute_fluid = True/False : set flags to compute fluid flow (default = False)
+        - coupled_fluid_heat = True/False : set flag for coupled simulation (default = True when both computed)
+        - execute_sheamt = True/False : execute SHEMAT directly after model setup
+        - initialize_temp_grad = True/False : set an initial temperature gradient (may speed up computation)
+        - initialize_heads = True/False : set head values in all cells to total z-size of project (more stable?)
+        - set_head = int : set all head values to given number; not working if initialize_heads = True!!
+        - lambda0 = float : thermal conductivity (for the whole model)
+
+    note: the following keywords address some SHEMAT variables with a more meaningful term
+        - bc_temperature_side = 'dirichlet', 'neumann', 'no_flow': lateral thermal boundary conditions
+        - bc_temperature_top = 'dirichlet', 'neumann', 'no_flow': top thermal boundary conditions
+        - bc_temperature_base = 'dirichlet', 'neumann', 'no_flow': base thermal boundary conditions
+        - value_temperature_top = float : fixed temperature at top for dirichlet bc
+        - value_temperature_base = float : fixed temperature at base for dirichlet bc
+        - flux_temperature_top = float : defined heat flux over top for neumann temperature bc
+        - flux_temperature_base = float : defined heat flux over base for neumann temperature bc
+        - bc_flow_side = 'dirichlet', 'neumann', 'no_flow': lateral flow boundary conditions
+        - bc_flow_top = 'dirichlet', 'neumann', 'no_flow': top flow boundary conditions
+        - bc_flow_base = 'dirichlet', 'neumann', 'no_flow': base flow boundary conditions
+        - value_head_top = float : fixed head at top for dirichlet bc
+        - value_head_base = float : fixed head at base for dirichlet bc
+        - flux_flow_top = float : defined fluid flux over top for neumann temperature bc
+        - flux_flow_base = float : defined fluid flux over base for neumann temperature bc
+     
+    note: the following keywords address functionalities to read the model geometry from a GeoModeller model
+        - update_from_geomodel = True/False
+        - geomodeller_dir = directory_path
+        - geomodel_filename = geomodel_filename
+        - geomodel_properties = csv_file : csv file with model properties (see ge2she)
+        - extent_x = (float, float) : range of geomodel in x-direction (default: model range)
+        - extent_y = (float, float) : range of geomodel in y-direction (default: model range)
+        - extent_z = (float, float) : range of geomodel in z-direction (default: model range)   
+    """
+    print kwds['dx']
+    print kwds['dy']
+    print kwds['dz']
+    nx = len(kwds['dx'])
+    ny = len(kwds['dy'])
+    nz = len(kwds['dz'])
+    # caluclate layer grid size
+    layer_grid_number = len(kwds['dx']) * len(kwds['dy'])
+    model_grid_number = len(kwds['dx']) * len(kwds['dy'])* len(kwds['dz'])
+    S1 = Shemat_file()
+    # define basic project lines
+    S1.filelines = []
+    lines = """# TITLE
+Horizontal -
+# IPUTDI
+1234567X9012
+# LINFO
+1
+# I0
+       10 
+# J0
+       10 
+# K0
+       10 
+# IDIM
+       10 
+# JDIM
+       10 
+# KDIM
+       10 
+# KEY
+-I---
+# STAT
+STAT
+# KOPLNG
+----
+# KOPPX_FLAG
+0 0 0 0 0 
+# KOPPX_FIELD
+998.0 0.61 4.5E-10 4179.0 8.9E-04 
+# WARNG
+WARN
+# MXIT
+20000
+# NPER
+       1 
+# PICARD
+1
+# CHI
+ 0.5
+# MAXPICARDIT
+5
+# ABSPICARDF
+ 0.001
+# ABSPICARDT
+ 0.001
+# ABSPICARDS
+0
+# RHOF
+998.0
+# TREF
+20.0000
+# CREF
+120.000
+# TOPF
+NFLO
+# BASEF
+NFLO
+# SEITEF
+NFLO
+NFLO
+NFLO
+NFLO
+# NFREE
+ 0 
+# KFREE
+100*0
+# IFLO
+MASS
+# IQRE
+NIX
+# GRAV
+9.80665
+# COMPF
+0.460000E-09
+# COMPM
+1.0E-10
+# VBASAL
+0.0
+# ERRF
+1.0E-10
+# OMF
+1.0
+# APARF
+1.0
+# CONTROLF
+ 48 
+# TOPT
+TEMP
+# BASET
+WSD
+# SEITET
+NFLO
+NFLO
+NFLO
+NFLO
+# CMA1
+0.00000
+# CMA2
+0.00000
+# CMA3
+0.00000
+# HPF
+0.0
+# QTOP3D
+100*0. 
+# QBASAL3D
+100*0.08 
+# OMT
+1.0
+# APART
+1.0
+# CONTROLT
+ 48 
+# ERRT
+1.0E-10
+# TOPS
+NFLO
+# BASES
+NFLO
+# SEITES
+NFLO
+NFLO
+NFLO
+NFLO
+# MDIFS1
+0.5E-08
+# MDIFD1
+0.000
+# MDIFD2
+0.000
+# MDIFD3
+0.000
+# DIFTS1
+2.01
+# DIFLS1
+2.01
+# ERRS
+1.0E-10
+# OMS
+1.0
+# APARS
+1.0
+# CONTROLS
+ 48 
+# ANZSUBS
+ 0 
+# BETAC
+0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 
+# ANZCHEM
+ 0 
+# ANZMINS
+0
+# FRACEXP
+1.
+1.
+1.
+# IZV
+100*0
+# SIEQ
+20*0.0
+# VMOL
+20*0.0
+# AO
+20*0.
+# EACT
+20*0.
+# RATE
+20*0.
+# NWELAR
+100*0
+# DELTATMP
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+# TMAXAR
+1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+# DELTAR
+1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+# TCON
+10000*0.0
+# SCON
+10000*0.0
+# IWL
+1000*0
+# WELLAR
+10000*0.
+# PUMPAR
+10000*0.
+# PMONIX
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# PMONIY
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# PMONIZ
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# PMONIFR
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+# DELX
+10*100. 
+# DELY
+10*100. 
+# DELZ
+100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 
+# GEOLOGY
+1000*1 
+# PRES
+1000*0.1 
+# POR
+900*0.25 100*-0.25 
+# DICHTE
+1000*1000.
+# PERM
+1000*1.E-12 
+# RHOCF
+1000*0.
+# PHI
+1000*0. 
+# VX
+1000*0.
+# VY
+1000*0.
+# VZ
+1000*0.
+# QRE
+200*0.
+# QRELR
+200*0.
+# QREVH
+200*0.
+# ANISOI
+1000*1. 
+# ANISOJ
+1000*1. 
+# TEMP
+1000*10. 
+# RHOCM
+1000*2.06E6 
+# WLFM0
+1000*2.9 
+# WLXANI
+1000*1. 
+# WLYANI
+1000*1. 
+# XANG
+1000*0. 
+# YANG
+1000*0. 
+# HPR
+1000*0. 
+# AREAKT
+1000*0.
+    """
+    lines_trans = """# TITLE
+Horizontal -
+# IPUTDI
+1234567X9012
+# LINFO
+1
+# I0
+       10 
+# J0
+       10 
+# K0
+       10 
+# IDIM
+       10 
+# JDIM
+       10 
+# KDIM
+       10 
+# KEY
+FI---
+# STAT
+INST
+# KOPLNG
+C---
+# KOPPX_FLAG
+0 0 0 0 0 
+# KOPPX_FIELD
+998.0 0.61 4.5E-10 4179.0 8.9E-04 
+# WARNG
+WARN
+# MXIT
+20000
+# NPER
+       10 
+# PICARD
+1
+# CHI
+ 0.5
+# MAXPICARDIT
+5
+# ABSPICARDF
+ 0.001
+# ABSPICARDT
+ 0.001
+# ABSPICARDS
+0
+# RHOF
+998.0
+# TREF
+20.0000
+# CREF
+120.000
+# TOPF
+NFLO
+# BASEF
+NFLO
+# SEITEF
+NFLO
+NFLO
+NFLO
+NFLO
+# NFREE
+ 0 
+# KFREE
+100*0
+# IFLO
+MASS
+# IQRE
+NIX
+# GRAV
+9.80665
+# COMPF
+0.460000E-09
+# COMPM
+1.0E-10 
+# VBASAL
+0.0
+# ERRF
+1.0E-10
+# OMF
+1.0
+# APARF
+1.0
+# CONTROLF
+ 48 
+# TOPT
+TEMP
+# BASET
+WSD
+# SEITET
+NFLO
+NFLO
+NFLO
+NFLO
+# CMA1
+0.00000
+# CMA2
+0.00000
+# CMA3
+0.00000
+# HPF
+0.0
+# QTOP3D
+100*0. 
+# QBASAL3D
+100*0.08 
+# OMT
+1.0
+# APART
+1.0
+# CONTROLT
+ 48 
+# ERRT
+1.0E-10
+# TOPS
+NFLO
+# BASES
+NFLO
+# SEITES
+NFLO
+NFLO
+NFLO
+NFLO
+# MDIFS1
+0.5E-08
+# MDIFD1
+0.000
+# MDIFD2
+0.000
+# MDIFD3
+0.000
+# DIFTS1
+2.01
+# DIFLS1
+2.01
+# ERRS
+1.0E-10
+# OMS
+1.0
+# APARS
+1.0
+# CONTROLS
+ 48 
+# ANZSUBS
+ 0 
+# BETAC
+0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 
+# ANZCHEM
+ 0 
+# ANZMINS
+0
+# FRACEXP
+1.
+1.
+1.
+# IZV
+100*0
+# SIEQ
+20*0.0
+# VMOL
+20*0.0
+# AO
+20*0.
+# EACT
+20*0.
+# RATE
+20*0.
+# NWELAR
+100*0
+# DELTATMP
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+# TMAXAR
+3153600000000.0 6307200000000.0 9460800000000.0 12614400000000.0 15768000000000.0 18921600000000.0 22075200000000.0 25228800000000.0 28382400000000.0 31536000000000.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+# DELTAR
+315360000000.0 315360000000.0 315360000000.0 315360000000.0 315360000000.0 315360000000.0 315360000000.0 315360000000.0 315360000000.0 315360000000.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+# TCON
+10000*0.0
+# SCON
+10000*0.0
+# IWL
+1000*0
+# WELLAR
+10000*0.
+# PUMPAR
+10000*0.
+# PMONIX
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# PMONIY
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# PMONIZ
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# PMONIFR
+100 10 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+# DELX
+10*100. 
+# DELY
+10*100. 
+# DELZ
+100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 
+# GEOLOGY
+1000*1 
+# PRES
+1000*0.1 
+# POR
+900*0.25 100*-0.25 
+# DICHTE
+1000*1000.
+# PERM
+1000*1.E-12 
+# RHOCF
+1000*0.
+# PHI
+1000*1000. 
+# VX
+1000*0.
+# VY
+1000*0.
+# VZ
+1000*0.
+# QRE
+200*0.
+# QRELR
+200*0.
+# QREVH
+200*0.
+# ANISOI
+1000*1. 
+# ANISOJ
+1000*1. 
+# TEMP
+1000*10. 
+# RHOCM
+1000*2.06E6 
+# WLFM0
+1000*2.9 
+# WLXANI
+1000*1. 
+# WLYANI
+1000*1. 
+# XANG
+1000*0. 
+# YANG
+1000*0. 
+# HPR
+1000*0. 
+# AREAKT
+1000*0."""
+    lines_trans_2 = """# TITLE
+Horizontal -
+# IPUTDI
+1234567X9012
+# LINFO
+1
+# I0
+       30 
+# J0
+       10 
+# K0
+       10 
+# IDIM
+       30 
+# JDIM
+       10 
+# KDIM
+       10 
+# KEY
+FI---
+# STAT
+INST
+# KOPLNG
+C---
+# KOPPX_FLAG
+0 0 0 0 0 
+# KOPPX_FIELD
+998.0 0.61 4.5E-10 4179.0 8.9E-04 
+# WARNG
+WARN
+# MXIT
+20000
+# NPER
+       100 
+# PICARD
+1
+# CHI
+ 0.5
+# MAXPICARDIT
+5
+# ABSPICARDF
+ 0.001
+# ABSPICARDT
+ 0.001
+# ABSPICARDS
+0
+# RHOF
+998.0
+# TREF
+20.0000
+# CREF
+120.000
+# TOPF
+NFLO
+# BASEF
+FLO
+# SEITEF
+NFLO
+NFLO
+FLO
+NFLO
+# NFREE
+ 0 
+# KFREE
+100*0
+# IFLO
+MASS
+# IQRE
+NIX
+# GRAV
+9.80665
+# COMPF
+0.460000E-09
+# VBASAL
+0.0
+# ERRF
+1.0E-10
+# OMF
+1.0
+# APARF
+1.0
+# CONTROLF
+ 48 
+# TOPT
+TEMP
+# BASET
+TEMP
+# SEITET
+NFLO
+NFLO
+NFLO
+NFLO
+# CMA1
+0.00000
+# CMA2
+0.00000
+# CMA3
+0.00000
+# HPF
+0.0
+# QTOP3D
+300*0. 
+# QBASAL3D
+300*0.06
+# OMT
+1.0
+# APART
+1.0
+# CONTROLT
+ 48 
+# ERRT
+1.0E-10
+# TOPS
+NFLO
+# BASES
+NFLO
+# SEITES
+NFLO
+NFLO
+NFLO
+NFLO
+# MDIFS1
+0.5E-08
+# MDIFD1
+0.000
+# MDIFD2
+0.000
+# MDIFD3
+0.000
+# DIFTS1
+2.01
+# DIFLS1
+2.01
+# ERRS
+1.0E-10
+# OMS
+1.0
+# APARS
+1.0
+# CONTROLS
+ 48 
+# ANZSUBS
+ 0 
+# BETAC
+0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 
+# ANZCHEM
+ 0 
+# ANZMINS
+0
+# FRACEXP
+1.
+1.
+1.
+# IZV
+100*0
+# SIEQ
+20*0.0
+# VMOL
+20*0.0
+# AO
+20*0.
+# EACT
+20*0.
+# RATE
+20*0.
+# NWELAR
+100*0
+# DELTATMP
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+# TMAXAR
+31536000000.0 63072000000.0 94608000000.0 126144000000.0 157680000000.0 189216000000.0 220752000000.0 252288000000.0 283824000000.0 315360000000.0 346896000000.0 378432000000.0 409968000000.0 441504000000.0 473040000000.0 504576000000.0 536112000000.0 567648000000.0 599184000000.0 630720000000.0 662256000000.0 693792000000.0 725328000000.0 756864000000.0 788400000000.0 819936000000.0 851472000000.0 883008000000.0 914544000000.0 946080000000.0 977616000000.0 1009152000000.0 1040688000000.0 1072224000000.0 1103760000000.0 1135296000000.0 1166832000000.0 1198368000000.0 1229904000000.0 1261440000000.0 1292976000000.0 1324512000000.0 1356048000000.0 1387584000000.0 1419120000000.0 1450656000000.0 1482192000000.0 1513728000000.0 1545264000000.0 1576800000000.0 1608336000000.0 1639872000000.0 1671408000000.0 1702944000000.0 1734480000000.0 1766016000000.0 1797552000000.0 1829088000000.0 1860624000000.0 1892160000000.0 1923696000000.0 1955232000000.0 1986768000000.0 2018304000000.0 2049840000000.0 2081376000000.0 2112912000000.0 2144448000000.0 2175984000000.0 2207520000000.0 2239056000000.0 2270592000000.0 2302128000000.0 2333664000000.0 2365200000000.0 2396736000000.0 2428272000000.0 2459808000000.0 2491344000000.0 2522880000000.0 2554416000000.0 2585952000000.0 2617488000000.0 2649024000000.0 2680560000000.0 2712096000000.0 2743632000000.0 2775168000000.0 2806704000000.0 2838240000000.0 2869776000000.0 2901312000000.0 2932848000000.0 2964384000000.0 2995920000000.0 3027456000000.0 3058992000000.0 3090528000000.0 3122064000000.0 3153600000000.0 
+# DELTAR
+3153600000.0 3153600000.0 3153600000.0 3153600000.0 3153600000.0 3153600000.0 3153600000.0 3153600000.0 3153600000.0 3153600000.0 6307200000.0 6307200000.0 6307200000.0 6307200000.0 6307200000.0 6307200000.0 6307200000.0 6307200000.0 6307200000.0 6307200000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 31536000000.0 
+# TCON
+10000*0.0
+# SCON
+10000*0.0
+# IWL
+3000*0
+# WELLAR
+10000*0.
+# PUMPAR
+10000*0.
+# PMONIX
+5 10 15 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# PMONIY
+6 6 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# PMONIZ
+6 6 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# PMONIFR
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+# DELX
+30*100. 
+# DELY
+10*100. 
+# DELZ
+100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 
+# GEOLOGY
+1000*1 7*2 23*1 7*2 23*1 7*2 23*1 7*2 203*1 7*2 23*1 7*2 23*1 7*2 23*1 7*2 203*1 7*2 23*1 7*2 23*1 7*2 23*1 7*2 1303*1 
+# PRES
+3000*0.1 
+# POR
+300*-0.25 2400*0.25 300*-0.25 
+# DICHTE
+3000*1000.
+# PERM
+2729*1.E-13 -1.E-13 29*1.E-13 -1.E-13 29*1.E-13 -1.E-13 29*1.E-13 -1.E-13 6*1.E-13 3*-1.E-13 20*1.E-13 -1.E-13 6*1.E-13 3*-1.E-13 20*1.E-13 -1.E-13 6*1.E-13 3*-1.E-13 20*1.E-13 -1.E-13 29*1.E-13 -1.E-13 29*1.E-13 -1.E-13 29*1.E-13 -1.E-13 
+# RHOCF
+3000*0.
+# PHI
+2729*100. 110. 29*100. 110. 29*100. 110. 29*100. 110. 6*100. 3*105. 20*100. 110. 6*100. 3*105. 20*100. 110. 6*100. 3*105. 20*100. 110. 29*100. 110. 29*100. 110. 29*100. 110. 
+# VX
+3000*0.
+# VY
+3000*0.
+# VZ
+3000*0.
+# QRE
+300*0. 300*0. 
+# QRELR
+-0.0000001 0. -0.0000001 0. -0.0000001 0. -0.0000001 0. -0.0000001 0. -0.0000001 0. -0.0000001 0. -0.0000001 0. -0.0000001 0. -0.0000001 102*0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 0. 1.E-08 
+# QREVH
+0. 5*-0.0000001 594*0. 
+# ANISOI
+3000*1. 
+# ANISOJ
+3000*1. 
+# TEMP
+300*90. 2400*0. 300*10. 
+# RHOCM
+3000*2.06E6 
+# WLFM0
+1000*1.5 7*2.9 23*1.5 7*2.9 23*1.5 7*2.9 23*1.5 7*2.9 203*1.5 7*2.9 23*1.5 7*2.9 23*1.5 7*2.9 23*1.5 7*2.9 203*1.5 7*2.9 23*1.5 7*2.9 23*1.5 7*2.9 23*1.5 7*2.9 1303*1.5 
+# WLXANI
+3000*1. 
+# WLYANI
+3000*1. 
+# XANG
+3000*0. 
+# YANG
+3000*0. 
+# HPR
+3000*0. 
+# AREAKT
+3000*0."""
+    if kwds.has_key('transient') and kwds['transient']==True:
+        lines = lines_trans_2
+        
+    for l in lines.split("\n"):
+        print l
+        S1.filelines.append(l+"\n")
+    # get original dimensions for rescaling below
+    ori_nx = int(S1.get("IDIM"))
+    ori_ny = int(S1.get("JDIM"))
+    ori_nz = int(S1.get("KDIM"))
+    # now: define all variables
+    if kwds.has_key('title'):
+        if ("Horizontal" in kwds['title']) or ("Vertical" in kwds['title']):
+            title = kwds['title']
+        else:
+            title = "Horizontal - " + kwds['title']
+        S1.set("TITLE",title)
+    else:
+        S1.set("TITLE", "Horizontal - Model created with PySHEMAT")
+    # set nodes and delimiters
+    print "\n\n\tCheck implementation of I0,J0,K0!\n\n\n"
+    S1.set("I0",len(kwds['dx']))
+    S1.set("J0",len(kwds['dy']))
+    S1.set("K0",len(kwds['dz']))
+    S1.set("IDIM", len(kwds['dx']))
+    S1.set("JDIM", len(kwds['dy']))
+    S1.set("KDIM", len(kwds['dz']))
+    S1.set_array("DELX", kwds['dx'])
+    S1.set_array("DELY", kwds['dy'])
+    S1.set_array("DELZ", kwds['dz'])
+    # set problem key, if defined in kwds
+    if kwds.has_key('key'): S1.set("KEY", kwds['key'])
+    if kwds.has_key('stat'): S1.set("STAT", kwds['stat'])
+    if kwds.has_key('koplng'): S1.set("KOPLNG", kwds['koplng'])
+    #
+    # use other keyword definitions to set key and coupling indirectly
+    #
+    if kwds.has_key('compute_heat') and kwds['compute_heat'] == False:
+        H = '-'
+    else: # default: True
+        H = 'I'
+    if kwds.has_key('compute_fluid') and kwds['compute_fluid'] == True:
+        F = 'F'
+    else: # default: False
+        F = '-'
+    S1.set("KEY", F + H + "---")    
+    if kwds.has_key('coupled_fluid_heat') and kwds['coupled_fluid_heat'] == False:
+        coupling = '----'
+    else:
+        coupling = 'C---'
+    S1.set("KOPLNG", coupling)
+    # set monitoring positions; check if in range of model before implementing (SHEMAT crashes otherwise)
+    if kwds.has_key('monitoring') and len(kwds['monitoring']) != 0:
+        mx = []
+        my = []
+        mz = []
+        # check input and create arrays
+        for i,m in enumerate(kwds['monitoring']):
+            if m[0] > nx or m[1] > ny or m[2] > nz:
+                print "\n\n\tMonitoring position %d not within model range! Please check!!\n\n\n" % i
+            else:
+                mx.append(int(m[0]))
+                my.append(int(m[1]))
+                mz.append(int(m[2]))
+        # now: update monitoring variable
+        pmonix = S1.get_array("PMONIX")
+        pmoniy = S1.get_array("PMONIY")
+        pmoniz = S1.get_array("PMONIZ")
+        from numpy import r_
+        pmonix_new = r_[mx,pmonix[len(mx):]]
+        pmoniy_new = r_[my,pmoniy[len(my):]]
+        pmoniz_new = r_[mz,pmoniz[len(mz):]]
+        S1.set_array("PMONIX", pmonix_new)
+        S1.set_array("PMONIY", pmoniy_new)
+        S1.set_array("PMONIZ", pmoniz_new)
+
+    # set fluid boundary conditions
+    # (not yet impemented)
+    # set temperature boundary conditions: SHEMAT notation (strange variable names)
+    if kwds.has_key('topt'): S1.set("TOPT", kwds['topt'])
+    if kwds.has_key('baset'): S1.set("BASET", kwds['baset'])
+    if kwds.has_key('seitet'): 
+        # problem here: defined in four proceeding lines... set all as the same (for now)
+        S1.set("SEITET", kwds['seitet'])
+        S1.set("SEITET", kwds['seitet'], line=2)
+        S1.set("SEITET", kwds['seitet'], line=3)
+        S1.set("SEITET", kwds['seitet'], line=4)
+    # set top and bottom heat flux values (if defined... if not: adjust for number of cells)
+    # or: use one value for heat flux, defined with kwds heat_flux_top and heat_flux_bottom
+    if kwds.has_key('qtop3d'): 
+        S1.set_array("QTOP3D", kwds['qtop3d'])
+    else:
+        if kwds.has_key('top_heat_flux'): S1.set_array("QTOP3D", layer_grid_number * [kwds['top_heat_flux']])
+        else: # in this case: reset length of array only and use first value
+            S1.change_array_length("QTOP3D", layer_grid_number)
+    if kwds.has_key('qbasal3d'): 
+        S1.set_array("QBASAL3D", kwds['qbasald'])
+    else:
+        if kwds.has_key('basal_heat_flux'): S1.set_array("QBASAL3D", layer_grid_number * [kwds['basal_heat_flux']])
+        else: # in this case: reset length of array only and use first value
+            S1.change_array_length("QBASAL3D", layer_grid_number)
+
+    # set temperature boundary conditions: new method (adjusted variable names)
+    if kwds.has_key('bc_temperature_side'):
+        if kwds['bc_temperature_side'] == 'no_flow':
+            S1.set("SEITET", 'NFLO')
+            S1.set("SEITET", 'NFLO', line=2)
+            S1.set("SEITET", 'NFLO', line=3)
+            S1.set("SEITET", 'NFLO', line=4)
+        else:
+            print("\n\n\tOnly no flow side boundary conditions are implemented so far...n")
+            print("\tBC side set to no-flow, adjust by hand (or in ProcessingSHEMAT) if required")
+    if kwds.has_key('bc_temperature_top'):
+        if kwds['bc_temperature_top'] == 'no_flow':
+            S1.set("TOPT", 'NFLO')
+        elif kwds['bc_temperature_top'] == 'dirichlet':
+            S1.set("TOPT", 'TEMP')
+        elif kwds['bc_temperature_top'] == 'neumann':
+            S1.set("TOPT", 'WSD')
+        else:
+            print("Temperature BC " + kwds['bc_temperature_top'] + " not recognized!")
+            print("Please check and try again")
+            raise KeyError
+    if kwds.has_key('bc_temperature_base'):
+        if kwds['bc_temperature_base'] == 'no_flow':
+            S1.set("TOPT", 'NFLO')
+        elif kwds['bc_temperature_base'] == 'dirichlet':
+            S1.set("TOPT", 'TEMP')
+        elif kwds['bc_temperature_base'] == 'neumann':
+            S1.set("TOPT", 'WSD')
+        else:
+            print("\n\n\tTemperature BC " + kwds['bc_temperature_base'] + " not recognized!")
+            print("\tPlease check and try again\n\n")
+            raise KeyError
+    
+    # set flow boundary conditions: new method (adjusted variable names)
+    if kwds.has_key('bc_flow_side'):
+        if kwds['bc_flow_side'] == 'no_flow':
+            S1.set("SEITET", 'NFLO')
+            S1.set("SEITET", 'NFLO', line=2)
+            S1.set("SEITET", 'NFLO', line=3)
+            S1.set("SEITET", 'NFLO', line=4)
+        else:
+            print("\n\n\tOnly no flow side boundary conditions are implemented so far...n")
+            print("\tBC side set to no-flow, adjust by hand (or in ProcessingSHEMAT) if required")
+    if kwds.has_key('bc_flow_top'):
+        if kwds['bc_flow_top'] == 'no_flow':
+            S1.set("TOPF", 'NFLO')
+        elif kwds['bc_flow_top'] == 'dirichlet':
+            # S1.set("TOPF", 'FREE')
+            print("\n\n\tNote: BC dirichlet for top flow not yet implemented!\n")
+            print("\tSet to no_flow and adjust by hand or with ProcessingSHEMAT if required!\n")
+            raise KeyError
+        elif kwds['bc_flow_top'] == 'neumann':
+            # S1.set("TOPF", 'RECH')
+            print("\n\n\tNote: BC neumann for top flow not yet implemented!\n")
+            print("\tSet to no_flow and adjust by hand or with ProcessingSHEMAT if required!\n")
+            raise KeyError
+        else:
+            print("Flow BC " + kwds['bc_flow_top'] + " not recognized!")
+            print("Please check and try again")
+            raise KeyError
+    if kwds.has_key('bc_flow_base'):
+        if kwds['bc_flow_base'] == 'no_flow':
+            S1.set("BASEF", 'NFLO')
+        elif kwds['bc_temperature_base'] == 'dirichlet':
+            print("\n\n\tDefinition of dirichlet BC at base not possible with SHEMAT, sorry!\n")
+            raise KeyError
+        elif kwds['bc_temperature_base'] == 'neumann':
+            # S1.set("BASEF", 'FLO')
+            print("\n\n\tDefinition of base neumann BC for flow not yet implemented in PySHEMAT!\n")
+            print("\tSet to no_flow and adjust by hand or with ProcessingSHEMAT\n")
+            raise KeyError
+        else:
+            print("\n\n\tFlow BC " + kwds['bc_flow_base'] + " not recognized!")
+            print("\tPlease check and try again\n\n")
+            raise KeyError
+
+    
+    # rescale recharge rate variables QRE, QRELR, QREVH
+    S1.change_array_length("# QRE", len(kwds['dx']) * len(kwds['dy']) * 2)
+    S1.change_array_length("# QRELR", len(kwds['dy']) * len(kwds['dz']) * 2)
+    S1.change_array_length("# QREVH", len(kwds['dz']) * len(kwds['dx']) * 2)
+    
+    # change boundary condition arrays (self.diri_temp, self.diri_head and self.diri_conc)
+    # !!! CAUTION !!! checks and adjusts for constant BC at top and bottom only!
+    S1.get_bcs()
+    diri_temp_new = (layer_grid_number * [S1.diri_temp[0]] + 
+                     (model_grid_number - 2 * layer_grid_number) * [S1.diri_temp[ori_nx * ori_ny + 1]] + 
+                     layer_grid_number * [S1.diri_temp[-1]])
+    S1.diri_temp = diri_temp_new
+    diri_conc_new = (layer_grid_number * [S1.diri_conc[0]] + 
+                     (model_grid_number - 2 * layer_grid_number) * [S1.diri_conc[ori_nx * ori_ny + 1]] + 
+                     layer_grid_number * [S1.diri_conc[-1]])
+    S1.diri_conc = diri_conc_new
+    diri_head_new = (layer_grid_number * [S1.diri_head[0]] + 
+                     (model_grid_number - 2 * layer_grid_number) * [S1.diri_head[ori_nx * ori_ny + 1]] + 
+                     layer_grid_number * [S1.diri_head[-1]])
+    S1.diri_head = diri_head_new
+    
+    
+    # change array length for POR, PERM and PRES; this has to be done seperately
+    # due to the 'strange' convention of negative POR, PERM and PRES for Dirichlet BC temp, head and conc...
+    
+
+    # define here all other arrays that have to be re-scaled
+    # some variables are defined in the whole model, some only in layers (takes layer_grid_num to resize)
+    layer_vars = ["QTOP3D", 
+                  "QBASAL3D"]
+    model_vars = ["GEOLOGY",
+                    "PRES",
+                    "POR",
+                    "DICHTE",
+                    "PERM",
+                    "RHOCF",
+                    "PHI",
+                    "VX",
+                    "VY",
+                    "VZ",
+                    "# IWL",
+                    "ANISOI",
+                    "ANISOJ",
+                    "# TEMP",
+                    "RHOCM",
+                    "WLFM0",
+                    "WLXANI",
+                    "WLYANI",
+                    "XANG",
+                    "YANG",
+                    "HPR",
+                    "AREAKT"                  
+                    ]
+    for var_name in layer_vars:
+        print var_name
+        S1.change_array_length(var_name, layer_grid_number)
+    for var_name in model_vars:
+        print var_name
+        S1.change_array_length(var_name, model_grid_number)
+    #
+    # now: initialize temperature gradient and/ or hydraulic heads
+    #
+    if kwds.has_key('initialize_temp_grad') and kwds['initialize_temp_grad']:
+        # calculate thermal gradient from basal heat flux value, thermal conductivity and top temperature
+        print "Initialize temperature gradient"
+        if kwds.has_key('basal_heat_flux'):
+            q = kwds['basal_heat_flux']
+            l = S1.get_array("WLFM0")[0]
+            t_grad = q/l
+            t0 = S1.get_array("# TEMP")[-1] # get surface temperature
+            temp_xyz = S1.get_array_as_xyz_structure("# TEMP")
+            total_depth = sum(kwds['dz'])
+            for x in range(nx):
+                for y in range(ny):
+                    for z in range(nz):
+                        depth = total_depth - sum(kwds['dz'][0:z])
+                        temp_xyz[x][y][z] = t0 + depth * t_grad
+            S1.set_array_from_xyz_structure("# TEMP", temp_xyz)
+        else: print "need basal heat flux (kwds: basal_heat_flux) to calculate initial gradient!"
+    if kwds.has_key('initialize_heads') and kwds['initialize_heads']:
+        print "Intitialize hydraulic heads"
+        # set head values all to project depth (matter of stability?)
+        heads = S1.get_array("PHI")
+        total_depth = sum(kwds['dz'])
+        new_heads = []
+        for h in heads:
+            new_heads.append(total_depth)
+        S1.set_array("PHI", new_heads)
+    if kwds.has_key('set_head'):
+        new_h = kwds['set_head']
+        heads = S1.get_array("PHI")
+        new_heads = []
+        for h in heads:
+            new_heads.append(new_h)
+        S1.set_array("PHI", new_heads)
+    if kwds.has_key('lambda0'):
+        from numpy import ones
+        lambda0 = ones(len(kwds['dx']) * len(kwds['dy']) * len(kwds['dz'])) * kwds['lambda0']
+        S1.set_array("WLFM0",lambda0)
+        
+    if kwds.has_key('vtk') and kwds['vtk'] == False:
+        # no vtk export of results (to save disk space)
+        iputdi = S1.get('IPUTDI')
+        iputdi = iputdi.rstrip()
+        iputdi = iputdi[:7] + '8' + iputdi[8:]
+        S1.set('IPUTDI',iputdi)
+
+### added 28/07/2010
+    if kwds.has_key('topt') and kwds['topt'] == "TEMP" and kwds.has_key('top_temperature'):
+        temp = S1.get_array("# TEMP")
+        from numpy import ones
+        n_layer = nx*ny
+        temp[-n_layer:] = ones(n_layer) * float(kwds['top_temperature'])
+        S1.set_array("# TEMP", temp)
+        
+    if kwds.has_key('baset') and kwds['baset'] == "TEMP" and kwds.has_key('base_temperature'):
+        # set temperature at base of model
+        temp = S1.get_array("# TEMP")
+        from numpy import ones
+        n_layer = nx*ny
+        temp[:n_layer] = ones(n_layer) * float(kwds['base_temperature'])
+        S1.set_array("# TEMP", temp)
+    
+    # adjust base and top temperatures for defined dirichlet BC with new methods
+    if kwds.has_key('bc_temperature_top') and kwds['bc_temperature_top'] == "dirichlet":
+        temp = S1.get_array("# TEMP")
+        from numpy import ones
+        n_layer = nx*ny
+        try:
+            temp[-n_layer:] = ones(n_layer) * float(kwds['value_temperature_top'])
+        except KeyError:
+            print("\n\n\tIf bc_temperature_top is set to 'dirichlet', value_temperature_top has to be passed as keyword!\n")
+            print("\tvalue_temperature_top = float : temperature at top of model\n")
+            print("\tPlease adjust and try again!\n\n")
+            raise KeyError
+        S1.set_array("# TEMP", temp)
+        
+    if kwds.has_key('bc_temperature_base') and kwds['bc_temperature_base'] == "dirichlet":
+        # set temperature at base of model
+        temp = S1.get_array("# TEMP")
+        from numpy import ones
+        n_layer = nx*ny
+        try:
+            temp[:n_layer] = ones(n_layer) * float(kwds['value_temperature_base'])
+        except KeyError:
+            print("\n\n\tIf bc_temperature_base is set to 'dirichlet', value_temperature_base has to be passed as keyword!\n")
+            print("\tvalue_temperature_base = float : temperature at base of model\n")
+            print("\tPlease adjust and try again!\n\n")
+            raise KeyError
+
+        S1.set_array("# TEMP", temp)
+    
+    
+    if kwds.has_key('random_perm_flux_sigma') and kwds['random_perm_flux_sigma'] > 0    :
+        from numpy import random, array
+        perm = S1.get_array("PERM")
+        n_layer = nx*ny
+        perm_top = perm[n_layer:]
+        perm_bottom = perm[:n_layer]
+        perm_flux = random.randn(len(perm))*kwds['random_perm_flux_sigma']
+        perm_new = array(perm) + array(perm_flux)
+        S1.set_array("PERM", perm_new)
+        
+    if kwds.has_key('random_init_temperature_flux_sigma') and kwds['random_init_temperature_flux_sigma'] > 0:
+        # introduce random temperature fluctiations in nml file
+        from numpy import random, array
+        temp = S1.get_array("# TEMP")
+        n_layer = nx*ny
+        temp_top = temp[-n_layer:]
+        temp_bottom = temp[:n_layer]
+        temp_flux = random.randn(len(temp))*kwds['random_init_temperature_flux_sigma']
+        temp_new = array(temp) + array(temp_flux)
+        if kwds.has_key('exclude_top_bottom') and kwds['exclude_top_bottom']:
+            temp_new[-n_layer:] = temp_top
+            temp_new[:n_layer] = temp_bottom
+        S1.set_array("# TEMP", temp_new)
+### end added
+
+    
+    # update from GeoModel
+    """
+        update_from_geomodel = True/False
+        geomodeller_dir = directory_path
+        geomodel_filename = geomodel_filename
+        geomodel_properties = csv_file : csv file with model properties (see ge2she)
+    """
+    from os import getcwd, chdir
+    ori_dir = getcwd()
+    # check if model extent defined
+    if kwds.has_key('extent_x'):
+        lower_left_x = min(kwds['extent_x']) # [0]
+#        lower_left_x = 0
+    else:
+        lower_left_x = ''
+    if kwds.has_key('extent_y'):
+        lower_left_y = min(kwds['extent_y']) # [0]
+#        lower_left_y = 0
+    else:
+        lower_left_y = ''
+    if kwds.has_key('extent_z'):
+        lower_left_z = min(kwds['extent_z']) # [0]
+#
+#   !!!!!!!!!!!!!!!!! HARDCODED BECAUSE IT DOESN'T WORK OTHERWISE!!!! CHECK!!!!
+#
+#        lower_left_z = 0
+    else:
+        lower_left_z = ''
+        
+    if kwds.has_key('update_from_geomodel') and kwds['update_from_geomodel']:
+        if kwds.has_key('geomodeller_dir'):
+            chdir(kwds['geomodeller_dir'])
+        else:
+            chdir(raw_input('Please enter path of geomodel: '))
+        if kwds.has_key('geomodel_filename'):
+            geomodel_file = kwds['geomodel_filename']
+        else:
+            geomodel_file = raw_input('Please enter filename of geomodel: ')
+        S1.update_model_from_geomodeller_xml_file(geomodel_file,
+                                                  lower_left_x = lower_left_x,
+                                                  lower_left_y = lower_left_y,
+                                                  lower_left_z = lower_left_z)
+        if kwds.has_key('geomodel_properties') and kwds['geomodel_properties'] != "":
+            S1.update_properties_from_csv_list(kwds['geomodel_properties'])
+    if kwds.has_key('update_from_voxet_file') and kwds['update_from_voxet_file']:
+        """update shemat geology array from voxet file, exported from GeoModeller"""
+#        if kwds.has_key('geomodeller_dir'):
+#            chdir(kwds['geomodeller_dir'])
+#        else:
+#            chdir(raw_input('Please enter path of geomodel: '))
+#        if kwds.has_key('geomodel_filename'):
+#            geomodel_file = kwds['geomodel_filename']
+#        else:
+#            geomodel_file = raw_input('Please enter filename of geomodel: ')
+        S1.update_model_from_voxet_file(kwds['voxet_filename'], **kwds)
+        if kwds.has_key('geomodel_properties') and kwds['geomodel_properties'] != "":
+            S1.update_properties_from_csv_list(kwds['geomodel_properties'])
+        
+    if kwds.has_key('baset') and kwds['baset']=='TEMP':
+        por = S1.get_array("POR")
+        n_layer = nx*ny
+        for i in range(n_layer):
+            if por[i] > 0:
+                por[i] = - por[i]
+        S1.set_array("POR", por)
+
+    
+    if kwds.has_key('equilibrium_layer') and kwds['equilibrium_layer'] > 0:
+        # add thermal equilibrium layers at bottom of model
+        S1.assing_thermal_equil_layers(kwds['equilibrium_layer'])
+    
+    if kwds.has_key('nml_filename'):
+        filename = kwds['nml_filename']
+    else:
+        filename = "shemat_empty_project"
+    chdir(ori_dir)
+    create_shemat_control_file(filename)
+    S1.write_file(filename)
+    if kwds.has_key('execute_shemat') and kwds['execute_shemat']:
+        print "Execute SHEMAT"
+        execute_shemat()
+    return S1
+
