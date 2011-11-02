@@ -44,7 +44,7 @@ class Shemat_file:
     def __init__(self, filename='', **kwds):
         """Initialization of SHEMAT object
         
-       **Arguments**:
+        **Arguments**:
             - *new_filename* = string: filename in case an empty file is created
         
         **Optional keywords**:
@@ -112,7 +112,7 @@ class Shemat_file:
         within a control file in the current directory from old_filename to 
         new_filename.
         
-       **Arguments**:
+        **Arguments**:
             - *old_filename* = string: filename of original SHEMAT file in directory
             - *new_filename* = string: filename of new SHEMAT file
         
@@ -2107,11 +2107,19 @@ class Shemat_file:
         return self.formation_masks
 
     def calc_block_volume(self):
-        """compute the volume of each block (important for cases of non-regular meshes!)
-        store and return as self.block_volume list
-        Enables, for example, the simple calculation of the total formation volume in combination
+        """Compute the volume of each block in the model
+        
+        Function calculates the volume of each cell, can be important to process
+        results for cases of non-regular meshes. Results are stored in self.block_volume list
+        and returned as list; Enables, for example, the simple calculation of the total formation volume in combination
         with self.formation_masks:
         volume_3 = sum(self.formation_masks[3] * self.block_volume)
+        
+        **Arguments**:
+            none
+        
+        **Returns**:
+            - block_volume = list : list (1D) of block volumes
         """
         idim = int(self.get("IDIM"))
         jdim = int(self.get("JDIM"))
@@ -2244,18 +2252,24 @@ class Shemat_file:
         return zi
         
     def assign_xy_values_from_grid(self, grid_xy, property, **kwds):
-        """Initiate temperature with values from a temperature grid, e.g.:
+        """Assing initial values as a function of location to all model cells
+        
+        This function can be used to initiate temperature with values from a temperature grid, e.g.:
         from interpolated surface temperature values, with
         self.interpolate_values_on_xy_grid;
         can be assigned for the whole model, e.g. to initiate temperature values
-        from a grid to all x,y coordinates, or for one property zone only, e.g.
+        from a grid to all x,y coordinates;
+        
+        The function can also be used for one property zone only, e.g.
         to allow lateral changes of porosity, etc.
-        arguments:
-        grid_xy = 1-D array with grid values, for example created with 
+        
+        **Arguments**:
+            - grid_xy = 1-D array with grid values, for example created with 
             self.interpolate_values_on_xy_grid
-        property = SHEMAT variable name, e.g. "TEMP": variable to assign interpolated values
-        optional keywords:
-        formation_id = int : formation id for which assignment should be performed
+            - property = SHEMAT variable name, e.g. "TEMP": variable to assign interpolated values
+        
+        **Optional Keywords**:
+            - formation_id = int : formation id for which assignment should be performed
         """
         
         # idea: for formation id assignment: use formation masks, as used for mean temp
@@ -2330,15 +2344,20 @@ class Shemat_file:
             raise ValueError
         
     def assign_temperatures_function(self, a, b, **kwds):
-        """Assign initial temperatures as a linear function of 
-        altitude; function: ax + b
-        a = float : gradient
-        b = float : y-axis intercept
-        assigns all valus to initial temperatures; "Air"-values can then
+        """Assign initial temperatures as a linear function of altitude
+        
+        This function can be used to e.g. to assign temperatures at the model
+        surface as a function f(x) = ax + b of altitude for thermal boundary conditions
+        Function assigns all valus to initial temperatures; these "Air"-values can then
         be fixed with self.fix_const_bc_for_one_formation
-        optional keywords:
-        min_alt = float : minimum altitude to assign temperature function
-        relative = float : calculate values relative to model origin (in model
+        
+        **Arguments**:
+            - a = float : gradient
+            - b = float : y-axis intercept
+        
+        **Optional keywords**:
+            - min_alt = float : minimum altitude to assign temperature function
+            - relative = float : calculate values relative to model origin (in model
                     coordinate system)
         """
         try:
@@ -2377,10 +2396,16 @@ class Shemat_file:
         self.set_array_from_xyz_structure("# TEMP", temp_xyz)
     
     def assign_new_unit_to_layers(self,n_layers,start=0):
-        """assign a new geological unit to one or more layers, e.g. to create a 
-        thermal equilibrium layer at the bottom of the model;
-        start = int : start from this layer, default=0: at bottom of model
-        n_layers = int : number of layers with new geological unit
+        """Assign a new geological unit to one or more layers
+        
+        This method can be used to create a thermal equilibrium layer at the
+        base of the model
+        
+        **Arguments**:
+            - n_layers = int : number of layers with new geological unit
+        
+        **Optional Arguments**:
+            - start = int : start from this layer, default=0: at bottom of model
         """
         try:
             self.idim
@@ -2404,12 +2429,17 @@ class Shemat_file:
         
 
     def assing_thermal_equil_layers(self,n,**kwds):
-        """assing layers with high lateral thermal conductivity at base of
+        """Assigni thermal equilibration layers to base of model
+        
+        Assing layers with high lateral thermal conductivity at base of
         model to allow for lateral equilibration of thermal heat flux;
         values for WLXANI and WLYANI are set to very high values;
-        n = int : number of layers with high anisotropy
-        optional keywords:
-        aniso_val = float : value of anisotropy; default: 999.
+        
+        **Arguments**:
+            - n = int : number of layers with high anisotropy
+        
+        **Optional Keywords**:
+            - aniso_val = float : value of anisotropy; default: 999.
         """
         wlxani = self.get_array("WLXANI")
         wlxanj = self.get_array("WLYANI")
