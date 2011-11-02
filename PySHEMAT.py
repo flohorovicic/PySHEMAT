@@ -1808,7 +1808,7 @@ class Shemat_file:
         cax = ax.imshow(property_xy, interpolation = interpolation, 
                         origin = 'lower', 
                         cmap=cmap,
-                        aspect=ratio_v,
+                        aspect=aspect,
                         vmin=vmin,
                         vmax=vmax) #, extent=(-4,4,-4,4))
         if kwds.has_key('contour') and kwds['contour']==True:
