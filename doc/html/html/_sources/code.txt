@@ -1,15 +1,49 @@
 Documentation for PySHEMAT
 **************************
 
+PySHEMAT is free software published under Gnu Public License (GPL).
+
+The actual version of the software can be downloaded from the github repository:
+
+https://github.com/flohorovicic/PySHEMAT
+
+The method has been published in Computers and Geosciences:
+
+http://www.sciencedirect.com/science/article/pii/S0098300411003426
+
+.. note:: If you use the methods, please reference the paper.
+
+.. toctree::
+   :maxdepth: 2
+
 Methods to read and write simulation input and output files
 =========================
 
 .. automodule:: PySHEMAT
-
-.. autoclass:: Shemat_file
    :members:
+
+.. A .. autoclass:: Shemat_file
+.. A   :members:
+
+.. A .. autofunction:: execute_shemat
 
 Methods to read monitoring files for transient simulations
 =========================
 
 Documentation will be added soon.
+
+Batch methods to simplify common tasks
+=========================
+
+Create a simple SHEMAT model
+++++++++++++++++++++++++
+
+The function ``create_empty_model()`` can be used to define a SHEMAT model with
+a simple function call. The model can have a rectilinear (i.e. non-regular) mesh structure,
+simple boundary conditions can be defined and the simulation can directly be performed.
+
+Another possibility is to save the simulation object to a .nml file and adjust further
+settings with the GUI ProcessingSHEMAT.
+
+.. autofunction:: create_empty_model
+

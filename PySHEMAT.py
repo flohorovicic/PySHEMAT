@@ -583,7 +583,7 @@ class Shemat_file:
         i,j,k are counters in x,y,z-direction, determined from the object itself
         
         **Arguments**:
-            - array = list or array to be restructured
+            - *array* = list or array to be restructured
         
         **Returns**:
             Restructured 3-D list of data values
@@ -992,9 +992,15 @@ class Shemat_file:
         return data
     
     def calc_mean_formation_temp(self, formation_id):
-        """calculate mean temperature of one formation at one location
-        formation_id : corresponding to the property id in Shemat/ Geology Variable
-        returns mean_temp = list (array with 2-D grid values in 1-D structure)
+        """Caluclate the mean temperature for one formation at each location
+        
+        Mean temperatures in z-direction are calculated at every location (x,y) for
+        a specified geological formation, for example to create a map of mean temperatures
+        
+        **Arguments**:
+            - *formation_id* = string : corresponding to the property id in Shemat/ Geology Variable
+        **Returns**:
+            - *mean_temp* = 1-D list of mean temperatures (array with 2-D grid values in 1-D structure)
         """
         # load geology data to xyz array
         geology_xyz = self.get_array_as_xyz_structure("GEOLOGY")
@@ -1086,8 +1092,22 @@ class Shemat_file:
             fig.savefig('delimiter_histogram.png')
         
     def calc_global_mean_value(self, property):
-        """calculate mean value for one property, location based; similar to
-        self.calc_mean_formation_value but without formation separation"""
+        """Calculate the mean value of one property
+        
+        Calculate the mean value for one SHEMAT property, location based, i.e. the
+        mean value in z-direction at every location (x,y); similar to
+        self.calc_mean_formation_value but without formation separation;
+        Can, for example, be used to calculate mean temperatures at each
+        location with
+        
+        mean_temp = S1.calc_global_mean_value("TEMP")
+        
+        **Arguments**:
+            - *property* = string : Name of SHEMAT property/ variable
+            
+        **Returns**:
+            - *mean_value* = list : 1-D list of mean values at each location (x,y)
+        """
         property_xyz = self.get_array_as_xyz_structure(property)
         idim = int(self.get("IDIM"))
         jdim = int(self.get("JDIM"))
@@ -1110,12 +1130,24 @@ class Shemat_file:
         return property_xy
     
     def random_property_change(self, formation_id, property, **kwds):
-        """add a random value to a property of one formation
-        formation_id : formation number
-        property : SHEMAT property type (e.g. "PERM")
-        optional keywords:
-        type = (gaussian, log, one_over_f, ...) : statistics
-        sigma = float : standard deviation for the case of gaussian statistics
+        """Add a random vaule to a property, based on geology identifyer
+        
+        Function can be used to randomize properties, e.g. permeability: a random
+        value is added (or substracted) to every *cell*, for a defined geological 
+        formation; 
+        
+        *note*: this function adds a value to each cell, not to the
+        value mapped to each formation! Therefore, the internal structure within
+        one formation is randomized.
+        
+        **Arguments**:
+            - formation_id = int : formation/ geology identifyer
+            - property = string : SHEMAT property/ variable (e.g. "PERM")
+        
+        **Optional Keywords**:
+            - type = (gaussian, log, one_over_f, ...) : statistics
+            - sigma = float : standard deviation for the case of gaussian statistics
+        
         (more added when required)
         """
         geology = self.get_array("GEOLOGY")
@@ -1147,10 +1179,17 @@ class Shemat_file:
             
     
     def calc_mean_formation_value(self, formation_id, property):
-        """calculate mean value for one property, location based
-        formation_id : corresponding to the property id in Shemat/ Geology Variable
-        property : can be any of the properties in the SHEMAT nml/nlo files, e.g.: DICHTE, PERM, POR
-        returns list mean_value[n]
+        """Calculate the mean value for one property in z-direction for one formation
+        
+        The mean value for one property in z-direction is calculated at every
+        location (x,y) in the SHEMAT mesh for one specified formation;
+        
+        **Arguments**:
+            - *formation_id* = int : corresponding to the property id in Shemat/ Geology Variable
+            - *property* = sring : can be any of the properties/ variables  in the SHEMAT nml/nlo files, e.g.: DICHTE, PERM, POR
+        
+        **Returns**:
+            *mean_value* = 1-D list of mean values at every location
         """
         # load geology data to xyz array
         geology_xyz = self.get_array_as_xyz_structure("GEOLOGY")
@@ -1177,9 +1216,16 @@ class Shemat_file:
         return property_xy
 
     def calc_formation_isopach(self, formation_id):
-        """calculate voxel based isopach map for a formation at all locations
-        formation_id : corresponding to the property id in Shemat/ Geology Variable
-        returns list isopach_xy[n]
+        """Calculate isopach map for one formation, based on discretization
+        
+        Calculate an isopach map for a formation based on the discretization
+        in the simulation at all locations
+        
+        **Arguments**:
+            - *formation_id* = int : corresponding to the property id in Shemat/ Geology Variable
+        
+        **Returns**:
+            *isopach_xy[n]* = list : 1D list of isopach values
         """
         # load geology data to xyz array
         geology_xyz = self.get_array_as_xyz_structure("GEOLOGY")
@@ -1233,9 +1279,13 @@ class Shemat_file:
         return A * 10 ** (B/(T-C))
     
     def calc_local_transmissivity(self,formation_id):
-        """calculate transmissivity at one location for one formation/ aquifer
-        formation_id : corresponding to the property id in Shemat/ Geology Variable
-        returns list transmissivity_xy[x][y]
+        """Calculate the transmissivity at every location for one formation/ aquifer
+
+        **Arguments**:
+            - *formation_id* = string : corresponding to the property id in Shemat/ Geology Variable
+        
+        **Returns**:
+            - *transmissivity_xy* = 1-D list of transmissivity values for each location
         """
         # load geology data to xyz array
         geology_xyz = self.get_array_as_xyz_structure("GEOLOGY")
@@ -1708,31 +1758,45 @@ class Shemat_file:
                 
                 
     def create_2D_property_plot(self,property,interpolation='spline36',**kwds):
-        """create a 2.5 D plot of a property, e.g. mean temperature calculated with
-        self.calc_mean_formation_value(1,"TEMP")
-        passed array should be 1-D, reshaping done in this method (with idim, jdim)
-        ATTENTION: uses matplotlib.imshow for plot, only regular mesh possible!
-        standard plot: two images, 
-        left image: raw data in (regular) cell structure
-        right image: interpolated data (with interpolation passed as argument, see 
-        matplotlib.imshow for possible values)
-        optional arguments:
-        title = 'Title'  Main title, if not given: name of array (to be implemented, now: no title)
-        xlabel = string : label of x-axis
-        ylabel = string : label of y-axis
-        xscale = 'meter', scale of x-axis (adjust tick labels)
-        yscale = 'meter', scale of y-axis (adjust tick labels)
-        colorbar = True/False : add colorbar to plot
-        colorbar_label = string : label of colorbar
-        colorbar_orientation = horizontal/ vertical
-        two_plots = True/False : add a subplot with interpolated image
-        show = True/False : show plot
-        savefig = True/False : save figure to file
-        filename = string : figure filename
-        cmap = colormap name for image (cm.colormap)
-        vmin = float : z-scale for image plot
-        vmax = float
-        vertical_ex = float : vertical exegeration, if set to 1: real aspect ratios
+        """Create a 2-D map/ (x,y) plot of a property
+        
+        Function to create a plot of a 2.5-D property that has been calculated with
+        some other function, for example the mean temperature in a formation, calculated
+        with S1.calc_mean_formation_value(4,"TEMP"); The "property" is a 1-D list,
+        as returned by the standard methods of this object for these types of 2.5-D structures;
+        The correct reformating into a (x,y) field is done within this method.
+
+        Two plots are created with the standard settings: left image with the raw data,
+        the original cell structure is visible; right image: interpolated data
+
+        ATTENTION: uses matplotlib.imshow for plot, only plots for regular mesh possible!
+
+        The figure can be opened on screen or directly saved to a file.
+
+        **Arguments**:
+            - *property* = 1-D list : list of values to be plotted
+        
+        **Optional Arguments**:
+            - *interpolation* = 'spline36','nearest',... : interpolation method, see matplotlib
+            documentation for detail
+        
+        **Optional Keywords**:
+            - *title* = string : Main title, if not given: name of array (to be implemented, now: no title)
+            - *xlabel* = string : label of x-axis
+            - *ylabel* = string : label of y-axis
+            - *xscale* = 'meter', scale of x-axis (adjust tick labels)
+            - *yscale* = 'meter', scale of y-axis (adjust tick labels)
+            - *colorbar* = True/False : add colorbar to plot
+            - *colorbar_label* = string : label of colorbar
+            - *colorbar_orientation* = horizontal/ vertical
+            - *two_plots* = True/False : add a subplot with interpolated image
+            - *show* = True/False : show plot
+            - *savefig* = True/False : save figure to file
+            - *filename* = string : figure filename
+            - *cmap* = colormap name for image (cm.colormap)
+            - *vmin* = float : z-scale for image plot
+            - *vmax* = float
+            - *vertical_ex* = float : vertical exegeration, if set to 1: real aspect ratios
         """ 
         # reshape data
         idim = int(self.get("IDIM"))
@@ -2074,8 +2138,13 @@ class Shemat_file:
         
 
     def change_array_length(self, var_name, length):
-        """change original array length to new length;
+        """Change the length of a variable array
+        
         *caution*: overwrites array and fills new array with value in first entry!!
+        
+        **Arguments**:
+            - *var_name* = string : name of variable/ property to be changed
+            - *length* = int : new length of array
         """
         value = self.get_array(var_name)[0]
         self.set_array(var_name, length * [value])
@@ -2119,7 +2188,7 @@ class Shemat_file:
             none
         
         **Returns**:
-            - block_volume = list : list (1D) of block volumes
+            - *block_volume* = list : list (1D) of block volumes
         """
         idim = int(self.get("IDIM"))
         jdim = int(self.get("JDIM"))
@@ -2264,12 +2333,12 @@ class Shemat_file:
         to allow lateral changes of porosity, etc.
         
         **Arguments**:
-            - grid_xy = 1-D array with grid values, for example created with 
+            - *grid_xy* = 1-D array with grid values, for example created with 
             self.interpolate_values_on_xy_grid
-            - property = SHEMAT variable name, e.g. "TEMP": variable to assign interpolated values
+            - *property* = SHEMAT variable name, e.g. "TEMP": variable to assign interpolated values
         
         **Optional Keywords**:
-            - formation_id = int : formation id for which assignment should be performed
+            - *formation_id* = int : formation id for which assignment should be performed
         """
         
         # idea: for formation id assignment: use formation masks, as used for mean temp
@@ -2352,12 +2421,12 @@ class Shemat_file:
         be fixed with self.fix_const_bc_for_one_formation
         
         **Arguments**:
-            - a = float : gradient
-            - b = float : y-axis intercept
+            - *a* = float : gradient
+            - *b* = float : y-axis intercept
         
         **Optional keywords**:
-            - min_alt = float : minimum altitude to assign temperature function
-            - relative = float : calculate values relative to model origin (in model
+            - *min_alt* = float : minimum altitude to assign temperature function
+            - *relative* = float : calculate values relative to model origin (in model
                     coordinate system)
         """
         try:
@@ -2402,10 +2471,10 @@ class Shemat_file:
         base of the model
         
         **Arguments**:
-            - n_layers = int : number of layers with new geological unit
+            - *n_layers* = int : number of layers with new geological unit
         
         **Optional Arguments**:
-            - start = int : start from this layer, default=0: at bottom of model
+            - *start* = int : start from this layer, default=0: at bottom of model
         """
         try:
             self.idim
@@ -2436,10 +2505,10 @@ class Shemat_file:
         values for WLXANI and WLYANI are set to very high values;
         
         **Arguments**:
-            - n = int : number of layers with high anisotropy
+            - *n* = int : number of layers with high anisotropy
         
         **Optional Keywords**:
-            - aniso_val = float : value of anisotropy; default: 999.
+            - *aniso_val* = float : value of anisotropy; default: 999.
         """
         wlxani = self.get_array("WLXANI")
         wlxanj = self.get_array("WLYANI")

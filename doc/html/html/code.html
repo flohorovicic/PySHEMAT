@@ -45,22 +45,31 @@
             
   <div class="section" id="documentation-for-pyshemat">
 <h1>Documentation for PySHEMAT<a class="headerlink" href="#documentation-for-pyshemat" title="Permalink to this headline">¶</a></h1>
+<p>PySHEMAT is free software published under Gnu Public License (GPL).</p>
+<p>The actual version of the software can be downloaded from the github repository:</p>
+<p><a class="reference external" href="https://github.com/flohorovicic/PySHEMAT">https://github.com/flohorovicic/PySHEMAT</a></p>
+<p>The method has been published in Computers and Geosciences:</p>
+<p><a class="reference external" href="http://www.sciencedirect.com/science/article/pii/S0098300411003426">http://www.sciencedirect.com/science/article/pii/S0098300411003426</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you use the methods, please reference the paper.</p>
+</div>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
 <div class="section" id="methods-to-read-and-write-simulation-input-and-output-files">
 <h2>Methods to read and write simulation input and output files<a class="headerlink" href="#methods-to-read-and-write-simulation-input-and-output-files" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-PySHEMAT"></span><p>PySHEMAT is a free set of Python modules to create and process input
 files for fluid and heat flow simulation with SHEMAT (<a class="reference external" href="http://137.226.107.10/aw/cms/website/zielgruppen/gge/research_gge/~uuv/Shemat/?lang=de">http://137.226.107.10/aw/cms/website/zielgruppen/gge/research_gge/~uuv/Shemat/?lang=de</a>)</p>
-<p>PySHEMAT is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">PySHEMAT is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</p>
-</div>
-<p>You should have received a copy of the GNU General Public License along with PySHEMAT.  If not, see &lt;<a class="reference external" href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.</p>
+<p>PySHEMAT is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</p>
+<p>You should have received a copy of the GNU General Public License along with PyTOUGH.  If not, see &lt;<a class="reference external" href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.</p>
+<hr class="docutils" />
 <p>For module, update and documentation of PySHEMAT please see:
 <a class="reference external" href="https://github.com/flohorovicic/PySHEMAT">https://github.com/flohorovicic/PySHEMAT</a></p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you use PySHEMAT for a scientific study, please cite our publication in Computers and Geosciences</p>
-</div>
+<p>If you use PySHEMAT for a scientific study, please cite our publication in Computers and Geoscience:
+J. Florian Wellmann, Adrian Croucher, Klaus Regenauer-Lieb, Python scripting libraries for subsurface fluid and heat flow simulations with TOUGH2 and SHEMAT, Computers &amp; Geosciences, 
+Available online 21 October 2011, ISSN 0098-3004, 10.1016/j.cageo.2011.10.011.</p>
 <dl class="class">
 <dt id="PySHEMAT.Shemat_file">
 <em class="property">class </em><tt class="descclassname">PySHEMAT.</tt><tt class="descname">Shemat_file</tt><big>(</big><em>filename=''</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file" title="Permalink to this definition">¶</a></dt>
@@ -97,27 +106,22 @@ results in a variety of different formats.</div></blockquote>
 <dt id="PySHEMAT.Shemat_file.adjust_ctl_file">
 <tt class="descname">adjust_ctl_file</tt><big>(</big><em>old_filename</em>, <em>new_filename</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.adjust_ctl_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adjust an existing SHEMAT control file with a new filename</p>
-<blockquote>
-<div>SHEMAT control files (.ctl) are required to run a SHEMAT simulation
+<p>SHEMAT control files (.ctl) are required to run a SHEMAT simulation
 from the command line. This function changes the filename settings
 within a control file in the current directory from old_filename to 
-new_filename.</div></blockquote>
+new_filename.</p>
 <dl class="docutils">
 <dt><strong>Arguments</strong>:</dt>
-<dd><blockquote class="first">
-<div><ul class="simple">
+<dd><ul class="first last simple">
 <li><em>old_filename</em> = string: filename of original SHEMAT file in directory</li>
 <li><em>new_filename</em> = string: filename of new SHEMAT file</li>
 </ul>
-</div></blockquote>
-<dl class="last docutils">
+</dd>
 <dt><strong>Optional keywords</strong>:</dt>
 <dd><ul class="first last simple">
 <li><em>backup</em> = False/ True: create shemat_ctl.bak backup file, default true</li>
 <li><em>ctl_filename</em> = &#8220;shemat.ctl&#8221; : set other ctl filename</li>
 </ul>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -149,7 +153,7 @@ new_filename.</div></blockquote>
 <dl class="docutils">
 <dt><strong>Arguments</strong>:</dt>
 <dd><ul class="first last simple">
-<li>array = list or array to be restructured</li>
+<li><em>array</em> = list or array to be restructured</li>
 </ul>
 </dd>
 <dt><strong>Returns</strong>:</dt>
@@ -160,112 +164,231 @@ new_filename.</div></blockquote>
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.assign_new_unit_to_layers">
 <tt class="descname">assign_new_unit_to_layers</tt><big>(</big><em>n_layers</em>, <em>start=0</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.assign_new_unit_to_layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>assign a new geological unit to one or more layers, e.g. to create a 
-thermal equilibrium layer at the bottom of the model;
-start = int : start from this layer, default=0: at bottom of model
-n_layers = int : number of layers with new geological unit</p>
+<dd><p>Assign a new geological unit to one or more layers</p>
+<p>This method can be used to create a thermal equilibrium layer at the
+base of the model</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>n_layers</em> = int : number of layers with new geological unit</li>
+</ul>
+</dd>
+<dt><strong>Optional Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>start</em> = int : start from this layer, default=0: at bottom of model</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.assign_temperatures_function">
 <tt class="descname">assign_temperatures_function</tt><big>(</big><em>a</em>, <em>b</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.assign_temperatures_function" title="Permalink to this definition">¶</a></dt>
-<dd><p>Assign initial temperatures as a linear function of 
-altitude; function: ax + b
-a = float : gradient
-b = float : y-axis intercept
-assigns all valus to initial temperatures; &#8220;Air&#8221;-values can then
-be fixed with self.fix_const_bc_for_one_formation
-optional keywords:
-min_alt = float : minimum altitude to assign temperature function
-relative = float : calculate values relative to model origin (in model</p>
-<blockquote>
-<div>coordinate system)</div></blockquote>
+<dd><p>Assign initial temperatures as a linear function of altitude</p>
+<p>This function can be used to e.g. to assign temperatures at the model
+surface as a function f(x) = ax + b of altitude for thermal boundary conditions
+Function assigns all valus to initial temperatures; these &#8220;Air&#8221;-values can then
+be fixed with self.fix_const_bc_for_one_formation</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>a</em> = float : gradient</li>
+<li><em>b</em> = float : y-axis intercept</li>
+</ul>
+</dd>
+<dt><strong>Optional keywords</strong>:</dt>
+<dd><ul class="first last">
+<li><p class="first"><em>min_alt</em> = float : minimum altitude to assign temperature function</p>
+</li>
+<li><dl class="first docutils">
+<dt><em>relative</em> = float <span class="classifier-delimiter">:</span> <span class="classifier">calculate values relative to model origin (in model</span></dt>
+<dd><p class="first last">coordinate system)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.assign_xy_values_from_grid">
 <tt class="descname">assign_xy_values_from_grid</tt><big>(</big><em>grid_xy</em>, <em>property</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.assign_xy_values_from_grid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initiate temperature with values from a temperature grid, e.g.:
+<dd><p>Assing initial values as a function of location to all model cells</p>
+<p>This function can be used to initiate temperature with values from a temperature grid, e.g.:
 from interpolated surface temperature values, with
 self.interpolate_values_on_xy_grid;
 can be assigned for the whole model, e.g. to initiate temperature values
-from a grid to all x,y coordinates, or for one property zone only, e.g.
-to allow lateral changes of porosity, etc.
-arguments:
-grid_xy = 1-D array with grid values, for example created with</p>
-<blockquote>
-<div>self.interpolate_values_on_xy_grid</div></blockquote>
-<p>property = SHEMAT variable name, e.g. &#8220;TEMP&#8221;: variable to assign interpolated values
-optional keywords:
-formation_id = int : formation id for which assignment should be performed</p>
+from a grid to all x,y coordinates;</p>
+<p>The function can also be used for one property zone only, e.g.
+to allow lateral changes of porosity, etc.</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first simple">
+<li><em>grid_xy</em> = 1-D array with grid values, for example created with</li>
+</ul>
+<p class="last">self.interpolate_values_on_xy_grid
+- <em>property</em> = SHEMAT variable name, e.g. &#8220;TEMP&#8221;: variable to assign interpolated values</p>
+</dd>
+<dt><strong>Optional Keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>formation_id</em> = int : formation id for which assignment should be performed</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.assing_thermal_equil_layers">
 <tt class="descname">assing_thermal_equil_layers</tt><big>(</big><em>n</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.assing_thermal_equil_layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>assing layers with high lateral thermal conductivity at base of
+<dd><p>Assigni thermal equilibration layers to base of model</p>
+<p>Assing layers with high lateral thermal conductivity at base of
 model to allow for lateral equilibration of thermal heat flux;
-values for WLXANI and WLYANI are set to very high values;
-n = int : number of layers with high anisotropy
-optional keywords:
-aniso_val = float : value of anisotropy; default: 999.</p>
+values for WLXANI and WLYANI are set to very high values;</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>n</em> = int : number of layers with high anisotropy</li>
+</ul>
+</dd>
+<dt><strong>Optional Keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>aniso_val</em> = float : value of anisotropy; default: 999.</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.calc_block_volume">
 <tt class="descname">calc_block_volume</tt><big>(</big><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_block_volume" title="Permalink to this definition">¶</a></dt>
-<dd><p>compute the volume of each block (important for cases of non-regular meshes!)
-store and return as self.block_volume list
-Enables, for example, the simple calculation of the total formation volume in combination
+<dd><p>Compute the volume of each block in the model</p>
+<p>Function calculates the volume of each cell, can be important to process
+results for cases of non-regular meshes. Results are stored in self.block_volume list
+and returned as list; Enables, for example, the simple calculation of the total formation volume in combination
 with self.formation_masks:
 volume_3 = sum(self.formation_masks[3] * self.block_volume)</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd>none</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>block_volume</em> = list : list (1D) of block volumes</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.calc_formation_isopach">
 <tt class="descname">calc_formation_isopach</tt><big>(</big><em>formation_id</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_formation_isopach" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate voxel based isopach map for a formation at all locations
-formation_id : corresponding to the property id in Shemat/ Geology Variable
-returns list isopach_xy[n]</p>
+<dd><p>Calculate isopach map for one formation, based on discretization</p>
+<p>Calculate an isopach map for a formation based on the discretization
+in the simulation at all locations</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>formation_id</em> = int : corresponding to the property id in Shemat/ Geology Variable</li>
+</ul>
+</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd><em>isopach_xy[n]</em> = list : 1D list of isopach values</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.calc_global_mean_value">
 <tt class="descname">calc_global_mean_value</tt><big>(</big><em>property</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_global_mean_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate mean value for one property, location based; similar to
-self.calc_mean_formation_value but without formation separation</p>
+<dd><p>Calculate the mean value of one property</p>
+<p>Calculate the mean value for one SHEMAT property, location based, i.e. the
+mean value in z-direction at every location (x,y); similar to
+self.calc_mean_formation_value but without formation separation;
+Can, for example, be used to calculate mean temperatures at each
+location with</p>
+<p>mean_temp = S1.calc_global_mean_value(&#8220;TEMP&#8221;)</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>property</em> = string : Name of SHEMAT property/ variable</li>
+</ul>
+</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>mean_value</em> = list : 1-D list of mean values at each location (x,y)</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.calc_local_transmissivity">
 <tt class="descname">calc_local_transmissivity</tt><big>(</big><em>formation_id</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_local_transmissivity" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate transmissivity at one location for one formation/ aquifer
-formation_id : corresponding to the property id in Shemat/ Geology Variable
-returns list transmissivity_xy[x][y]</p>
+<dd><p>Calculate the transmissivity at every location for one formation/ aquifer</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>formation_id</em> = string : corresponding to the property id in Shemat/ Geology Variable</li>
+</ul>
+</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>transmissivity_xy</em> = 1-D list of transmissivity values for each location</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.calc_mean_formation_temp">
 <tt class="descname">calc_mean_formation_temp</tt><big>(</big><em>formation_id</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_mean_formation_temp" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate mean temperature of one formation at one location
-formation_id : corresponding to the property id in Shemat/ Geology Variable
-returns mean_temp = list (array with 2-D grid values in 1-D structure)</p>
+<dd><p>Caluclate the mean temperature for one formation at each location</p>
+<p>Mean temperatures in z-direction are calculated at every location (x,y) for
+a specified geological formation, for example to create a map of mean temperatures</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>formation_id</em> = string : corresponding to the property id in Shemat/ Geology Variable</li>
+</ul>
+</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>mean_temp</em> = 1-D list of mean temperatures (array with 2-D grid values in 1-D structure)</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.calc_mean_formation_value">
 <tt class="descname">calc_mean_formation_value</tt><big>(</big><em>formation_id</em>, <em>property</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.calc_mean_formation_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate mean value for one property, location based
-formation_id : corresponding to the property id in Shemat/ Geology Variable
-property : can be any of the properties in the SHEMAT nml/nlo files, e.g.: DICHTE, PERM, POR
-returns list mean_value[n]</p>
+<dd><p>Calculate the mean value for one property in z-direction for one formation</p>
+<p>The mean value for one property in z-direction is calculated at every
+location (x,y) in the SHEMAT mesh for one specified formation;</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>formation_id</em> = int : corresponding to the property id in Shemat/ Geology Variable</li>
+<li><em>property</em> = sring : can be any of the properties/ variables  in the SHEMAT nml/nlo files, e.g.: DICHTE, PERM, POR</li>
+</ul>
+</dd>
+<dt><strong>Returns</strong>:</dt>
+<dd><em>mean_value</em> = 1-D list of mean values at every location</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.change_array_length">
 <tt class="descname">change_array_length</tt><big>(</big><em>var_name</em>, <em>length</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.change_array_length" title="Permalink to this definition">¶</a></dt>
-<dd><p>change original array length to new length;
-<em>caution</em>: overwrites array and fills new array with value in first entry!!</p>
+<dd><p>Change the length of a variable array</p>
+<p><em>caution</em>: overwrites array and fills new array with value in first entry!!</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>var_name</em> = string : name of variable/ property to be changed</li>
+<li><em>length</em> = int : new length of array</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -283,31 +406,49 @@ dechipher.</p>
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.create_2D_property_plot">
 <tt class="descname">create_2D_property_plot</tt><big>(</big><em>property</em>, <em>interpolation='spline36'</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.create_2D_property_plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>create a 2.5 D plot of a property, e.g. mean temperature calculated with
-self.calc_mean_formation_value(1,&#8221;TEMP&#8221;)
-passed array should be 1-D, reshaping done in this method (with idim, jdim)
-ATTENTION: uses matplotlib.imshow for plot, only regular mesh possible!
-standard plot: two images, 
-left image: raw data in (regular) cell structure
-right image: interpolated data (with interpolation passed as argument, see 
-matplotlib.imshow for possible values)
-optional arguments:
-title = &#8216;Title&#8217;  Main title, if not given: name of array (to be implemented, now: no title)
-xlabel = string : label of x-axis
-ylabel = string : label of y-axis
-xscale = &#8216;meter&#8217;, scale of x-axis (adjust tick labels)
-yscale = &#8216;meter&#8217;, scale of y-axis (adjust tick labels)
-colorbar = True/False : add colorbar to plot
-colorbar_label = string : label of colorbar
-colorbar_orientation = horizontal/ vertical
-two_plots = True/False : add a subplot with interpolated image
-show = True/False : show plot
-savefig = True/False : save figure to file
-filename = string : figure filename
-cmap = colormap name for image (cm.colormap)
-vmin = float : z-scale for image plot
-vmax = float
-vertical_ex = float : vertical exegeration, if set to 1: real aspect ratios</p>
+<dd><p>Create a 2-D map/ (x,y) plot of a property</p>
+<p>Function to create a plot of a 2.5-D property that has been calculated with
+some other function, for example the mean temperature in a formation, calculated
+with S1.calc_mean_formation_value(4,&#8221;TEMP&#8221;); The &#8220;property&#8221; is a 1-D list,
+as returned by the standard methods of this object for these types of 2.5-D structures;
+The correct reformating into a (x,y) field is done within this method.</p>
+<p>Two plots are created with the standard settings: left image with the raw data,
+the original cell structure is visible; right image: interpolated data</p>
+<p>ATTENTION: uses matplotlib.imshow for plot, only plots for regular mesh possible!</p>
+<p>The figure can be opened on screen or directly saved to a file.</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>property</em> = 1-D list : list of values to be plotted</li>
+</ul>
+</dd>
+<dt><strong>Optional Arguments</strong>:</dt>
+<dd><ul class="first simple">
+<li><em>interpolation</em> = &#8216;spline36&#8217;,&#8217;nearest&#8217;,... : interpolation method, see matplotlib</li>
+</ul>
+<p class="last">documentation for detail</p>
+</dd>
+<dt><strong>Optional Keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li><em>title</em> = string : Main title, if not given: name of array (to be implemented, now: no title)</li>
+<li><em>xlabel</em> = string : label of x-axis</li>
+<li><em>ylabel</em> = string : label of y-axis</li>
+<li><em>xscale</em> = &#8216;meter&#8217;, scale of x-axis (adjust tick labels)</li>
+<li><em>yscale</em> = &#8216;meter&#8217;, scale of y-axis (adjust tick labels)</li>
+<li><em>colorbar</em> = True/False : add colorbar to plot</li>
+<li><em>colorbar_label</em> = string : label of colorbar</li>
+<li><em>colorbar_orientation</em> = horizontal/ vertical</li>
+<li><em>two_plots</em> = True/False : add a subplot with interpolated image</li>
+<li><em>show</em> = True/False : show plot</li>
+<li><em>savefig</em> = True/False : save figure to file</li>
+<li><em>filename</em> = string : figure filename</li>
+<li><em>cmap</em> = colormap name for image (cm.colormap)</li>
+<li><em>vmin</em> = float : z-scale for image plot</li>
+<li><em>vmax</em> = float</li>
+<li><em>vertical_ex</em> = float : vertical exegeration, if set to 1: real aspect ratios</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -695,13 +836,31 @@ two_d = True/False : for 2-D case (only x, z boundaries are changed)</p>
 <dl class="method">
 <dt id="PySHEMAT.Shemat_file.random_property_change">
 <tt class="descname">random_property_change</tt><big>(</big><em>formation_id</em>, <em>property</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.Shemat_file.random_property_change" title="Permalink to this definition">¶</a></dt>
-<dd><p>add a random value to a property of one formation
-formation_id : formation number
-property : SHEMAT property type (e.g. &#8220;PERM&#8221;)
-optional keywords:
-type = (gaussian, log, one_over_f, ...) : statistics
-sigma = float : standard deviation for the case of gaussian statistics
-(more added when required)</p>
+<dd><p>Add a random vaule to a property, based on geology identifyer</p>
+<p>Function can be used to randomize properties, e.g. permeability: a random
+value is added (or substracted) to every <em>cell</em>, for a defined geological 
+formation;</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">this function adds a value to each cell, not to the</p>
+</div>
+<p>value mapped to each formation! Therefore, the internal structure within
+one formation is randomized.</p>
+<dl class="docutils">
+<dt><strong>Arguments</strong>:</dt>
+<dd><ul class="first last simple">
+<li>formation_id = int : formation/ geology identifyer</li>
+<li>property = string : SHEMAT property/ variable (e.g. &#8220;PERM&#8221;)</li>
+</ul>
+</dd>
+<dt><strong>Optional Keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li>type = (gaussian, log, one_over_f, ...) : statistics</li>
+<li>sigma = float : standard deviation for the case of gaussian statistics</li>
+</ul>
+</dd>
+</dl>
+<p>(more added when required)</p>
 </dd></dl>
 
 <dl class="method">
@@ -710,16 +869,12 @@ sigma = float : standard deviation for the case of gaussian statistics
 <dd><p>Open and read a SHEMAT .nml or .nlo file</p>
 <dl class="docutils">
 <dt><strong>Arguments</strong>:</dt>
-<dd><blockquote class="first">
-<div><ul class="simple">
+<dd><ul class="first last simple">
 <li><em>filename</em> = string: filename</li>
 </ul>
-</div></blockquote>
-<dl class="last docutils">
+</dd>
 <dt><strong>Returns</strong>:</dt>
 <dd>List of lines in the file</dd>
-</dl>
-</dd>
 </dl>
 </dd></dl>
 
@@ -829,6 +984,10 @@ the geology data into shemat object.</p>
 </ul>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">for more information on GeoModeller see the <a href="#id1"><span class="problematic" id="id2">`GeoModeller page &lt;http:www.geomodeller.com\&gt;`_</span></a></p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -891,10 +1050,256 @@ property_dict = dict : assigned values; can be defined for a subset of</p>
 
 </dd></dl>
 
+<dl class="function">
+<dt id="PySHEMAT.create_empty_model">
+<tt class="descclassname">PySHEMAT.</tt><tt class="descname">create_empty_model</tt><big>(</big><em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.create_empty_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a new SHEMAT model based on grid and boundary definition</p>
+<p>This method can be used to create a simple empty model box, defined with grid
+spacing in each direction (dx, dy, dz) and simple boundary conditions. The new
+model is created on basis of an nml-template file (defined in variable &#8220;lines&#8221; below).
+This method turned out to be the simplest way to keep the input file consistent.</p>
+<p>The standard base model is a conductive heat transport model, with a vtk file as graphic
+output, simulation is steady-state and no coupling is considered. All these settings can be
+changed with optional keywords (see below).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">general procedure: key words are the same as those in shemat nml file (but lowercase, as python convention)</p>
+</div>
+<dl class="docutils">
+<dt><strong>Optional Keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li>dx = [] : list of spacing in x-direction</li>
+<li>dy = [] : list of spacing in y-direction</li>
+<li>dz = [] : list of spacing in z-direction</li>
+<li>title = string : set title of simluation NOTE: A SHEMAT PECULIARITY IS THAT THE TYPE OF SIM HAS TO BE DEFINED HERE!</li>
+<li>key = 12345 : problem and numerical procedure key; specifically: set as FU&#8212; for fluid and heat flow</li>
+<li>stat = inst : if set to inst: transient simulation</li>
+<li>kopkng = (4 char word) : coupling info, specifically: C&#8212; : coupling of fluid and heat flow</li>
+<li>topt = WSD/ TEMP/ NFLO : thermal top BC; see also: bc_temperature_base</li>
+<li>baset = WSD/ TEMP/ NFLO : thermal base BC; see also: bc_temperature_top</li>
+<li>seitet = WSD/ TEMP/ NFLO : thermal side BC (set to same value for all sides for now...); see also: bc_temperature_side</li>
+<li>transient = True/False : perform transient simulation =&gt; 10 Periods, 100 k default setting</li>
+<li>monitoring = [[i1,j1,k1],[i2,j2,k2],...,[in,jn,kn]] : list of monitoring positions</li>
+</ul>
+</dd>
+</dl>
+<p>The following keywords are in addition to the standard SHEMAT variables, for simplification and additional features!</p>
+<blockquote>
+<div><ul class="simple">
+<li>nml_filename = string : filename for nml file (extension .nml added as default)</li>
+<li>top_heat_flux = int : one value for heat flux assigned to all cells</li>
+<li>basal_heat_flux = int : one value for heat flux, assigned to all cells</li>
+<li>compute_heat = True/False : set flags to compute heat transport (default = True)</li>
+<li>compute_fluid = True/False : set flags to compute fluid flow (default = False)</li>
+<li>coupled_fluid_heat = True/False : set flag for coupled simulation (default = True when both computed)</li>
+<li>execute_sheamt = True/False : execute SHEMAT directly after model setup</li>
+<li>initialize_temp_grad = True/False : set an initial temperature gradient (may speed up computation)</li>
+<li>initialize_heads = True/False : set head values in all cells to total z-size of project (more stable?)</li>
+<li>set_head = int : set all head values to given number; not working if initialize_heads = True!!</li>
+<li>lambda0 = float : thermal conductivity (for the whole model)</li>
+</ul>
+</div></blockquote>
+<p>The following keywords address some SHEMAT variables with a more meaningful term</p>
+<blockquote>
+<div><ul class="simple">
+<li>bc_temperature_side = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: lateral thermal boundary conditions</li>
+<li>bc_temperature_top = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: top thermal boundary conditions</li>
+<li>bc_temperature_base = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: base thermal boundary conditions</li>
+<li>value_temperature_top = float : fixed temperature at top for dirichlet bc</li>
+<li>value_temperature_base = float : fixed temperature at base for dirichlet bc</li>
+<li>flux_temperature_top = float : defined heat flux over top for neumann temperature bc</li>
+<li>flux_temperature_base = float : defined heat flux over base for neumann temperature bc</li>
+<li>bc_flow_side = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: lateral flow boundary conditions</li>
+<li>bc_flow_top = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: top flow boundary conditions</li>
+<li>bc_flow_base = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: base flow boundary conditions</li>
+<li>value_head_top = float : fixed head at top for dirichlet bc</li>
+<li>value_head_base = float : fixed head at base for dirichlet bc</li>
+<li>flux_flow_top = float : defined fluid flux over top for neumann temperature bc</li>
+<li>flux_flow_base = float : defined fluid flux over base for neumann temperature bc</li>
+</ul>
+</div></blockquote>
+<p>The following keywords address functionalities to read the model geometry from a GeoModeller model</p>
+<blockquote>
+<div><ul class="simple">
+<li>update_from_geomodel = True/False</li>
+<li>geomodeller_dir = directory_path</li>
+<li>geomodel_filename = geomodel_filename</li>
+<li>geomodel_properties = csv_file : csv file with model properties (see ge2she)</li>
+<li>extent_x = (float, float) : range of geomodel in x-direction (default: model range)</li>
+<li>extent_y = (float, float) : range of geomodel in y-direction (default: model range)</li>
+<li>extent_z = (float, float) : range of geomodel in z-direction (default: model range)</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="PySHEMAT.create_jobscript">
+<tt class="descclassname">PySHEMAT.</tt><tt class="descname">create_jobscript</tt><big>(</big><em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.create_jobscript" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a TORQUE/PBS jobscript for one
+nml simulation;
+optional keywords:
+name = string : simulation identifyer
+mail = string with mail address : send mail to this address when simulation finished
+ncpus = int : number of cpus for simulation (default: 4)
+vmem = int : number of GB for simulation run (default: 4)
+walltime = hh:mm:ss : requested simulation walltime (default: 00:30:00)
+job_filename = string : filename of jobscript (default: shemat_job)
+steady_state_init = True/ False : run as steady state first, then</p>
+<blockquote>
+<div>adapt .nlo file and run as transient simulation</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="PySHEMAT.create_jobscript_multiple_nmls">
+<tt class="descclassname">PySHEMAT.</tt><tt class="descname">create_jobscript_multiple_nmls</tt><big>(</big><em>nml_files</em><big>)</big><a class="headerlink" href="#PySHEMAT.create_jobscript_multiple_nmls" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a TORQUE/PBS jobscript to run the shemat simulation on XE
+Concept:
+- this function is designed to create one jobscript for multiple processes
+on XE
+- from one basedir (which is included as a bash variable and can be changed later),
+processes are called in subdirectories
+arguments:
+nml_files = list of filenames, path reference to basedir
+optional keywords:
+walltime = hh:mm:ss : requested walltime for process
+cpus = n : number of cpus requested
+basedir = directory path : path on XE where nml-files/ directories are placed
+To Do: include moving job (or write other jobscript?) to move results directly
+to pbstore after job execution
+move_to_pbstore
+pbstore_dir</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PySHEMAT.create_nml_dir">
+<tt class="descclassname">PySHEMAT.</tt><tt class="descname">create_nml_dir</tt><big>(</big><em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.create_nml_dir" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>create directory to store new .nml and .ctl files, </dt>
+<dd>default: .</dd>
+<dt>ml_run_n</dt>
+<dd>n is automatically asigned as continuous numbers, starting with &#8220;1&#8221;
+but can also be manually set with kwds: dir = str
+optional kwds:
+basename = string : basename of directory, number added
+n_format = int : number of integers (for %0nd format description)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="PySHEMAT.create_shemat_control_file">
+<tt class="descclassname">PySHEMAT.</tt><tt class="descname">create_shemat_control_file</tt><big>(</big><em>filename</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.create_shemat_control_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>create shemat.ctl file that is needed to run shemat
+optinal kwds:
+dir = dirpath : directory where file is created</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PySHEMAT.execute_shemat">
+<tt class="descclassname">PySHEMAT.</tt><tt class="descname">execute_shemat</tt><big>(</big><em>**kwds</em><big>)</big><a class="headerlink" href="#PySHEMAT.execute_shemat" title="Permalink to this definition">¶</a></dt>
+<dd><p>call shemat on system side and process converted file
+optional keywords:
+dir = dirpath : directory where shemat is executed</p>
+<p>Note: function determines operating system (NT or Linux/Mac) but program
+names are hardcoded and might have to be adapted</p>
+</dd></dl>
+
 </div>
 <div class="section" id="methods-to-read-monitoring-files-for-transient-simulations">
 <h2>Methods to read monitoring files for transient simulations<a class="headerlink" href="#methods-to-read-monitoring-files-for-transient-simulations" title="Permalink to this headline">¶</a></h2>
 <p>Documentation will be added soon.</p>
+</div>
+<div class="section" id="batch-methods-to-simplify-common-tasks">
+<h2>Batch methods to simplify common tasks<a class="headerlink" href="#batch-methods-to-simplify-common-tasks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="create-a-simple-shemat-model">
+<h3>Create a simple SHEMAT model<a class="headerlink" href="#create-a-simple-shemat-model" title="Permalink to this headline">¶</a></h3>
+<p>The function <tt class="docutils literal"><span class="pre">create_empty_model()</span></tt> can be used to define a SHEMAT model with
+a simple function call. The model can have a rectilinear (i.e. non-regular) mesh structure,
+simple boundary conditions can be defined and the simulation can directly be performed.</p>
+<p>Another possibility is to save the simulation object to a .nml file and adjust further
+settings with the GUI ProcessingSHEMAT.</p>
+<dl class="function">
+<dt>
+<tt class="descclassname">PySHEMAT.</tt><tt class="descname">create_empty_model</tt><big>(</big><em>**kwds</em><big>)</big></dt>
+<dd><p>create a new SHEMAT model based on grid and boundary definition</p>
+<p>This method can be used to create a simple empty model box, defined with grid
+spacing in each direction (dx, dy, dz) and simple boundary conditions. The new
+model is created on basis of an nml-template file (defined in variable &#8220;lines&#8221; below).
+This method turned out to be the simplest way to keep the input file consistent.</p>
+<p>The standard base model is a conductive heat transport model, with a vtk file as graphic
+output, simulation is steady-state and no coupling is considered. All these settings can be
+changed with optional keywords (see below).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">general procedure: key words are the same as those in shemat nml file (but lowercase, as python convention)</p>
+</div>
+<dl class="docutils">
+<dt><strong>Optional Keywords</strong>:</dt>
+<dd><ul class="first last simple">
+<li>dx = [] : list of spacing in x-direction</li>
+<li>dy = [] : list of spacing in y-direction</li>
+<li>dz = [] : list of spacing in z-direction</li>
+<li>title = string : set title of simluation NOTE: A SHEMAT PECULIARITY IS THAT THE TYPE OF SIM HAS TO BE DEFINED HERE!</li>
+<li>key = 12345 : problem and numerical procedure key; specifically: set as FU&#8212; for fluid and heat flow</li>
+<li>stat = inst : if set to inst: transient simulation</li>
+<li>kopkng = (4 char word) : coupling info, specifically: C&#8212; : coupling of fluid and heat flow</li>
+<li>topt = WSD/ TEMP/ NFLO : thermal top BC; see also: bc_temperature_base</li>
+<li>baset = WSD/ TEMP/ NFLO : thermal base BC; see also: bc_temperature_top</li>
+<li>seitet = WSD/ TEMP/ NFLO : thermal side BC (set to same value for all sides for now...); see also: bc_temperature_side</li>
+<li>transient = True/False : perform transient simulation =&gt; 10 Periods, 100 k default setting</li>
+<li>monitoring = [[i1,j1,k1],[i2,j2,k2],...,[in,jn,kn]] : list of monitoring positions</li>
+</ul>
+</dd>
+</dl>
+<p>The following keywords are in addition to the standard SHEMAT variables, for simplification and additional features!</p>
+<blockquote>
+<div><ul class="simple">
+<li>nml_filename = string : filename for nml file (extension .nml added as default)</li>
+<li>top_heat_flux = int : one value for heat flux assigned to all cells</li>
+<li>basal_heat_flux = int : one value for heat flux, assigned to all cells</li>
+<li>compute_heat = True/False : set flags to compute heat transport (default = True)</li>
+<li>compute_fluid = True/False : set flags to compute fluid flow (default = False)</li>
+<li>coupled_fluid_heat = True/False : set flag for coupled simulation (default = True when both computed)</li>
+<li>execute_sheamt = True/False : execute SHEMAT directly after model setup</li>
+<li>initialize_temp_grad = True/False : set an initial temperature gradient (may speed up computation)</li>
+<li>initialize_heads = True/False : set head values in all cells to total z-size of project (more stable?)</li>
+<li>set_head = int : set all head values to given number; not working if initialize_heads = True!!</li>
+<li>lambda0 = float : thermal conductivity (for the whole model)</li>
+</ul>
+</div></blockquote>
+<p>The following keywords address some SHEMAT variables with a more meaningful term</p>
+<blockquote>
+<div><ul class="simple">
+<li>bc_temperature_side = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: lateral thermal boundary conditions</li>
+<li>bc_temperature_top = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: top thermal boundary conditions</li>
+<li>bc_temperature_base = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: base thermal boundary conditions</li>
+<li>value_temperature_top = float : fixed temperature at top for dirichlet bc</li>
+<li>value_temperature_base = float : fixed temperature at base for dirichlet bc</li>
+<li>flux_temperature_top = float : defined heat flux over top for neumann temperature bc</li>
+<li>flux_temperature_base = float : defined heat flux over base for neumann temperature bc</li>
+<li>bc_flow_side = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: lateral flow boundary conditions</li>
+<li>bc_flow_top = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: top flow boundary conditions</li>
+<li>bc_flow_base = &#8216;dirichlet&#8217;, &#8216;neumann&#8217;, &#8216;no_flow&#8217;: base flow boundary conditions</li>
+<li>value_head_top = float : fixed head at top for dirichlet bc</li>
+<li>value_head_base = float : fixed head at base for dirichlet bc</li>
+<li>flux_flow_top = float : defined fluid flux over top for neumann temperature bc</li>
+<li>flux_flow_base = float : defined fluid flux over base for neumann temperature bc</li>
+</ul>
+</div></blockquote>
+<p>The following keywords address functionalities to read the model geometry from a GeoModeller model</p>
+<blockquote>
+<div><ul class="simple">
+<li>update_from_geomodel = True/False</li>
+<li>geomodeller_dir = directory_path</li>
+<li>geomodel_filename = geomodel_filename</li>
+<li>geomodel_properties = csv_file : csv file with model properties (see ge2she)</li>
+<li>extent_x = (float, float) : range of geomodel in x-direction (default: model range)</li>
+<li>extent_y = (float, float) : range of geomodel in y-direction (default: model range)</li>
+<li>extent_z = (float, float) : range of geomodel in z-direction (default: model range)</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
 </div>
 </div>
 
@@ -909,6 +1314,10 @@ property_dict = dict : assigned values; can be defined for a subset of</p>
 <li><a class="reference internal" href="#">Documentation for PySHEMAT</a><ul>
 <li><a class="reference internal" href="#methods-to-read-and-write-simulation-input-and-output-files">Methods to read and write simulation input and output files</a></li>
 <li><a class="reference internal" href="#methods-to-read-monitoring-files-for-transient-simulations">Methods to read monitoring files for transient simulations</a></li>
+<li><a class="reference internal" href="#batch-methods-to-simplify-common-tasks">Batch methods to simplify common tasks</a><ul>
+<li><a class="reference internal" href="#create-a-simple-shemat-model">Create a simple SHEMAT model</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
