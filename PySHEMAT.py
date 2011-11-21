@@ -1410,9 +1410,9 @@ class Shemat_file:
     def get_model_origin(self):
         """the model origin is not (or not correctly?) implemented in the
         SHEMAT nml file itself - prompt user to input, if required!"""
-        self.origin_x = raw_input("Model origin, x : ")
-        self.origin_y = raw_input("Model origin, y : ")
-        self.origin_z = raw_input("Model origin, z : ")
+        self.origin_x = float(raw_input("Model origin, x : "))
+        self.origin_y = float(raw_input("Model origin, y : "))
+        self.origin_z = float(raw_input("Model origin, z : "))
 
     def create_slice_plot(self, property, direction, position, **kwds):
         """create a 2-D plot of a property in a slice through the model, normal to
@@ -1615,19 +1615,26 @@ class Shemat_file:
 
         return property_slice
     
-    def get_value_xyz(self,property,x,y,z,interpolate=False,**kwds):
-        """get the value of the property at real-world position x,y,z;
-        returns float value
-        property = SHEMAT variable (e.g. "TEMP"
-        x,y,z = float : position [m]
-        optional keywords:
-        interpolated = True/ False: interpolate value between adjacent cell centres
-                     (simple linear interpolation, nothing fancy!)
-        relative = True/False : relative to model origin (not in real-world coordinates)"""
-        try:
-            self.origin_z
-        except AttributeError:
-            self.get_model_origin()
+    def get_value_xyz(self,property,x,y,z,interpolate=True,**kwds):
+        """Get the (interpolated )value of the property at real-world position
+        
+        Determine the value of a property at a position (x,y,z) in the model. The
+        value is interpolated from the surrounding grid cell centers with a simple
+        trilinear interpolation method. If the argument interpolate is set to False,
+        the value of the grid cell in which the position falls is returned. Requires
+        the origin of the model defined (self.set_origin).
+        
+        **Arguments**:
+            - *property* = string : SHEMAT property variable name, e.g. TEMP for temperature
+            - *x,y,z* = floats : position of values
+        
+        **Optional Keywords**:
+            - *relative* = True/ False: relative to model origin (i.e.: not in real-world
+            coordinates).
+            
+        **Returns**:
+            Variable value at x,y,z (float)
+        """
         try:
             self.boundaries_x
         except AttributeError:
@@ -1639,6 +1646,10 @@ class Shemat_file:
             origin_y = 0
             origin_z = 0
         else:
+            try:
+                self.origin_z
+            except AttributeError:
+                self.get_model_origin()
             origin_x = self.origin_x
             origin_y = self.origin_y
             origin_z = self.origin_z
@@ -1664,17 +1675,88 @@ class Shemat_file:
             if z_bound > (z - origin_z): 
                 z_pos = k-1 # array position corresponds to cell centre of cell before boundary!
                 break
-        # now: get property array and return result
-        property_xyz = self.get_array_as_xyz_structure(property)
+
         
         if interpolate==False: # simply use value of box that contains point
+            property_xyz = self.get_array_as_xyz_structure(property)
             return property_xyz[x_pos][y_pos][z_pos]
         else: # interpolate between adjacent values
-            if x > self.boundaries_x[i]:
-                pass
-            else:
-                pass
-    
+            # determine position of cell centers (not boundaries as for the case above!)
+            
+            # Use cell centers for interpolation
+            try:
+                self.centre_z
+            except AttributeError:
+                self.get_cell_centres()
+
+            
+            for i,x_bound in enumerate(self.centre_x):
+                if (x - origin_x) > self.centre_x[-1]:
+                    print "Position %s is out of bounds for direction x (max: %.2f)" % (x, self.boundaries_x[-1]+origin_x)
+                    raise ValueError
+                if x_bound >= (x - origin_x): 
+                    i = i-1 # array position corresponds to cell centre of cell before boundary!
+                    break
+            for j,y_bound in enumerate(self.centre_y):
+                if (y - origin_y) > self.centre_y[-1]:
+                    print "Position %s is out of bounds for direction y (max: %.2f)" % (y, self.boundaries_y[-1]+origin_y)
+                    raise ValueError
+                if y_bound >= (y - origin_y): 
+                    j = j-1 # array position corresponds to cell centre of cell before boundary!
+                    break
+            for k,z_bound in enumerate(self.centre_z):
+                if (z - origin_z) > self.centre_z[-1]:
+                    print "Position %s is out of bounds for direction z (max: %.2f)" % (z, self.boundaries_z[-1]+origin_z)
+                    raise ValueError
+                if z_bound >= (z - origin_z): 
+                    k = k-1 # array position corresponds to cell centre of cell before boundary!
+                    break
+            
+            # Get data
+            prop = self.get_array(property)
+            
+            # interpolate values in x-direction for all surrounding cell centers (from volumes to plane)
+            p_x1 = (prop[self.ap(i+1,j,k)] - prop[self.ap(i,j,k)]) / (self.centre_x[i+1]-self.centre_x[i]) \
+                    * (x - self.centre_x[i]) + prop[self.ap(i,j,k)]
+            p_x2 = (prop[self.ap(i+1,j+1,k)] - prop[self.ap(i,j+1,k)]) / (self.centre_x[i+1]-self.centre_x[i]) \
+                    * (x - self.centre_x[i]) + prop[self.ap(i,j+1,k)]
+            p_x3 = (prop[self.ap(i+1,j,k+1)] - prop[self.ap(i,j,k+1)]) / (self.centre_x[i+1]-self.centre_x[i]) \
+                    * (x - self.centre_x[i]) + prop[self.ap(i,j,k+1)]
+            p_x4 = (prop[self.ap(i+1,j+1,k+1)] - prop[self.ap(i,j+1,k+1)]) / (self.centre_x[i+1]-self.centre_x[i]) \
+                    * (x - self.centre_x[i]) + prop[self.ap(i,j+1,k+1)]
+            # now interpolate between these values in y - direction (from plane to line)
+            p_y1 = (p_x2 - p_x1) / (self.centre_y[j+1] - self.centre_y[j]) \
+                    * (y - self.centre_y[j]) + p_x1
+            p_y2 = (p_x4 - p_x3) / (self.centre_y[j+1] - self.centre_y[j]) \
+                    * (y - self.centre_y[j]) + p_x3
+            # now interpolate in z-direction (from line to point)
+            p_z = (p_y2 - p_y1) / (self.centre_z[k+1] - self.centre_z[k]) \
+                    * (z - self.centre_z[k]) + p_y1
+            
+            return p_z
+            
+    def ap(self,i,j,k):
+        """Shorthand for self.determine_array_pos(i,j,k)"""
+        return self.determine_array_pos(i,j,k)
+            
+    def determine_array_pos(self,i,j,k):
+        """Determine the position of an element in property array
+        
+        The SHEMAT properties are stored in 1-D array structures, in
+        x-, y-, z-dominance. This function determines the corresponding
+        position of an element in the 1-D array from the grid coordinate
+        position (i,j,k) and the number of cells in each direction.
+        
+        **Arguments**:
+            - *i,j,k* = int : grid coordinate position of cell
+            
+        **Returns**:
+            i = int : corresponding position in 1-D array
+        """
+        return i + self.idim * j + self.idim * self.jdim * k
+                
+                
+
     def get_profile_xy(self,property,x,y,**kwds):
         """get property profile at real-world position x,y. e.g. the temperature
         profile with depth; returns a 1-D array
