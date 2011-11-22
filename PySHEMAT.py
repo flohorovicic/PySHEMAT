@@ -2472,6 +2472,63 @@ class Shemat_file:
         else: # assign to all formations, i.e. the whole model!
             self.set_array(property, property_new)
         
+    def assign_value_to_one_formation(self,property,value,formation_id):
+        """Assign a specific value to one formation
+        
+        Method can be used to assing a fixed value to a specific formation,
+        for example to assing a temperature value for an "Ocean" formation
+        and combine it with a dirichlet BC. It can also be used to change
+        a property of one formation - without adjusting all others (as with
+        update_property_from_csv_list()).
+        
+        **Arguments**:
+            - *property* = string : SHEMAT property variable, e.g. "TEMP" for temperature
+            - *value* = float : value to be assigned
+            - *formation_id* = int : formation id to which property is assigned
+        """
+        try:
+            self.formation_masks[formation_id]
+        except AttributeError:
+            self.create_formation_masks()
+
+        property_array = self.get_array(property)
+        for i,m in enumerate(self.formation_masks[formation_id]):
+            if m == 1:
+                property_array[i] = value
+        self.set_array(property, property_array)
+    
+    def adjust_thickness_of_base_layers(self,n,thickness):
+        """Adjust/ increse the thickness of the base layers
+        
+        Can be used to increase the overall thickness of the model
+        and to extend it to a greater depth, e.g. to reach the Moho
+        as a lower thermal boundary condition, without having to change
+        the whole model structure.
+        
+        The argument thickness defines the overall thickness of all 
+        layers that are added. The layer n+1 above the n increased thickness
+        layers is itself increased to accommodate for the layers that were
+        moved further down. Sounds complicated, is simple...
+        
+        **Arguments**:
+            - *n* = int : number of layers to increase
+            - *thickness* = float : overall thickness to be added
+        """
+        self.delz = self.get_array("DELZ")
+        ori_thickness = sum(self.delz[:n+1])
+        
+        # assign thickness to extended layers
+        for i in range(n):
+            self.delz[i] = thickness / n
+            
+        # adjust thickness in n+1 layer
+        self.delz[n+1] = ori_thickness
+        
+        # write back to object
+        self.set_array("DELZ", self.delz)
+            
+        
+        
     def fix_const_bc_for_one_formation(self,bc_type,formation_id):
         """fix constant value boundary condition for one formation, e.g.
         to assign a fixed temperature to all values above topography, in the
