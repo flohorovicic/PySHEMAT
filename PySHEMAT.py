@@ -299,7 +299,7 @@ class Shemat_file:
                         try:
                             data.append(float(d))
                         except ValueError:
-                            print "Problem with value " + d
+                            print "Problem with value, probably empty string: " + d
         # check, if Boundary Conditions are affected
         if var_name == "POR" or var_name == "PERM" or var_name == "PRES":
             # check, if bcs are already read:
@@ -1631,14 +1631,13 @@ class Shemat_file:
         **Optional Keywords**:
             - *relative* = True/ False: relative to model origin (i.e.: not in real-world
             coordinates).
+            - *check_out_of_bounds* = True/ False: check if point is actually within model range
+            (otherwise, wrong results might be obtained or the method can crash). The check
+            can be deactivated to speed up calculation. Default: check is performed!
             
         **Returns**:
             Variable value at x,y,z (float)
         """
-        try:
-            self.boundaries_x
-        except AttributeError:
-            self.get_cell_boundaries()
         
         if kwds.has_key('relative') and kwds['relative']:
             # get value relative to model origin, not in real-world coordinates!
@@ -1654,27 +1653,48 @@ class Shemat_file:
             origin_y = self.origin_y
             origin_z = self.origin_z
 
-        for i,x_bound in enumerate(self.boundaries_x):
-            if (x - origin_x) > self.boundaries_x[-1]:
-                print "Position %s is out of bounds for direction x (max: %.2f)" % (x, self.boundaries_x[-1]+origin_x)
+        if kwds.has_key('check_out_of_bounds') and kwds['check_out_of_bounds'] == False:
+            pass
+        else:
+            # default: perform check
+            # first: check if value is smaller than origin
+            if x < origin_x:
+                print "Position %s is out of bounds for direction x (min: %.2f)" % (x, origin_x)
                 raise ValueError
-            if x_bound > (x - origin_x): 
-                x_pos = i-1 # array position corresponds to cell centre of cell before boundary!
-                break
-        for j,y_bound in enumerate(self.boundaries_y):
-            if (y - origin_y) > self.boundaries_y[-1]:
-                print "Position %s is out of bounds for direction y (max: %.2f)" % (y, self.boundaries_y[-1]+origin_y)
+            if y < origin_y:
+                print "Position %s is out of bounds for direction y (min: %.2f)" % (x, origin_x)
                 raise ValueError
-            if y_bound > (y - origin_y): 
-                y_pos = j-1 # array position corresponds to cell centre of cell before boundary!
-                break
-        for k,z_bound in enumerate(self.boundaries_z):
-            if (z - origin_z) > self.boundaries_z[-1]:
-                print "Position %s is out of bounds for direction z (max: %.2f)" % (z, self.boundaries_z[-1]+origin_z)
+            if z < origin_z:
+                print "Position %s is out of bounds for direction z (min: %.2f)" % (x, origin_x)
                 raise ValueError
-            if z_bound > (z - origin_z): 
-                z_pos = k-1 # array position corresponds to cell centre of cell before boundary!
-                break
+                
+            
+            try:
+                self.boundaries_x
+            except AttributeError:
+                self.get_cell_boundaries()
+    
+            for i,x_bound in enumerate(self.boundaries_x):
+                if (x - origin_x) > self.boundaries_x[-1]:
+                    print "Position %s is out of bounds for direction x (max: %.2f)" % (x, self.boundaries_x[-1]+origin_x)
+                    raise ValueError
+                if x_bound > (x - origin_x): 
+                    x_pos = i-1 # array position corresponds to cell centre of cell before boundary!
+                    break
+            for j,y_bound in enumerate(self.boundaries_y):
+                if (y - origin_y) > self.boundaries_y[-1]:
+                    print "Position %s is out of bounds for direction y (max: %.2f)" % (y, self.boundaries_y[-1]+origin_y)
+                    raise ValueError
+                if y_bound > (y - origin_y): 
+                    y_pos = j-1 # array position corresponds to cell centre of cell before boundary!
+                    break
+            for k,z_bound in enumerate(self.boundaries_z):
+                if (z - origin_z) > self.boundaries_z[-1]:
+                    print "Position %s is out of bounds for direction z (max: %.2f)" % (z, self.boundaries_z[-1]+origin_z)
+                    raise ValueError
+                if z_bound > (z - origin_z): 
+                    z_pos = k-1 # array position corresponds to cell centre of cell before boundary!
+                    break
 
         
         if interpolate==False: # simply use value of box that contains point
@@ -1717,21 +1737,21 @@ class Shemat_file:
             
             # interpolate values in x-direction for all surrounding cell centers (from volumes to plane)
             p_x1 = (prop[self.ap(i+1,j,k)] - prop[self.ap(i,j,k)]) / (self.centre_x[i+1]-self.centre_x[i]) \
-                    * (x - self.centre_x[i]) + prop[self.ap(i,j,k)]
+                    * ((x - origin_x) - self.centre_x[i]) + prop[self.ap(i,j,k)]
             p_x2 = (prop[self.ap(i+1,j+1,k)] - prop[self.ap(i,j+1,k)]) / (self.centre_x[i+1]-self.centre_x[i]) \
-                    * (x - self.centre_x[i]) + prop[self.ap(i,j+1,k)]
+                    * ((x - origin_x) - self.centre_x[i]) + prop[self.ap(i,j+1,k)]
             p_x3 = (prop[self.ap(i+1,j,k+1)] - prop[self.ap(i,j,k+1)]) / (self.centre_x[i+1]-self.centre_x[i]) \
-                    * (x - self.centre_x[i]) + prop[self.ap(i,j,k+1)]
+                    * ((x - origin_x) - self.centre_x[i]) + prop[self.ap(i,j,k+1)]
             p_x4 = (prop[self.ap(i+1,j+1,k+1)] - prop[self.ap(i,j+1,k+1)]) / (self.centre_x[i+1]-self.centre_x[i]) \
-                    * (x - self.centre_x[i]) + prop[self.ap(i,j+1,k+1)]
+                    * ((x - origin_x) - self.centre_x[i]) + prop[self.ap(i,j+1,k+1)]
             # now interpolate between these values in y - direction (from plane to line)
             p_y1 = (p_x2 - p_x1) / (self.centre_y[j+1] - self.centre_y[j]) \
-                    * (y - self.centre_y[j]) + p_x1
+                    * ((y - origin_y) - self.centre_y[j]) + p_x1
             p_y2 = (p_x4 - p_x3) / (self.centre_y[j+1] - self.centre_y[j]) \
-                    * (y - self.centre_y[j]) + p_x3
+                    * ((y - origin_y) - self.centre_y[j]) + p_x3
             # now interpolate in z-direction (from line to point)
             p_z = (p_y2 - p_y1) / (self.centre_z[k+1] - self.centre_z[k]) \
-                    * (z - self.centre_z[k]) + p_y1
+                    * ((z - origin_z) - self.centre_z[k]) + p_y1
             
             return p_z
             
