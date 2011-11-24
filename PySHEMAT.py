@@ -2363,6 +2363,29 @@ class Shemat_file:
             """ change back to original directory """
             chdir(oridir)
             
+    def update_model_from_geology_grid(self, grid_file, **kwds):
+        """Update the model geology from an exported geomodel grid file
+        
+        This method can be used to import the simulation model geology
+        (i.e. the distribution of geological units) from an external geology
+        grid file, for example created from a Geomodeller model with
+        the DOS program exportRectilinearMeshCellCenter.exe; This method is
+        considerably faster than exporting the model from the Geomodeller
+        xml file with self.update_from_geomodeller_xml_file(), however it
+        requires running the external grid generation first.
+        
+        **Arguments**:
+            - *grid_file* = string : filename of external grid file
+        """
+        f = open(grid_file, 'r')
+        filelines = f.readlines()
+        # the grid file is a csv file, structured in x-dominance, origin lower-left corner,
+        # with an end of line for each z-layer
+        geol = []
+        
+        
+        
+        
     def get_cell_pos(self,x,y,z):
         """get array position of cell that contains the coordinate x,y,z
         (in real world coordinates"""
@@ -2370,18 +2393,27 @@ class Shemat_file:
         
         
     def interpolate_values_on_xy_grid(self, x_coords, y_coords, z_values, **kwds):
-        """interpolate values on a regular grid with delauny triangulation,
+        """Interpolate values on a regular grid with delauny triangulation
+        
+        The method can be used to interpolate values from a regular array structure
+        onto the structure of the SHEMAT grid,       
         for example to enable a lateral change of porosity values
         (can then be assigned to one formation) or to interpolate surface
         temperature variations (can then be used as initial temperature condition);
-        x_coords = 1D-array : coordinate values in x-direction
-        y_coords = 1D-array : coordinate values in y-direction
-        z_values = 1D-array : values to be interpolated
-        returns an array with interpolated values, similar to mean temperature and
-        extracted model slice, that can then be used to plot and further processing
-        of the data;
-        optional keywords:
-        relative = True/False : relative to model origin (not in real-world coordinates)"""
+        
+        .. Attention:: Only works for a regular (x,y) grid!!!
+        
+        **Arguments**:
+            - *x_coords* = 1D-array : coordinate values in x-direction
+            - *y_coords* = 1D-array : coordinate values in y-direction
+            - *z_values* = 1D-array : values to be interpolated
+
+        **Optional Keywords**:
+            - *relative* = True/ False: relative to model origin (not in real-world coordinates)
+            
+        **Returns**:
+        1-D array with interpolated values (x-dominance 2-D grid)
+        """
         try:
             self.origin_z
         except AttributeError:
@@ -2958,59 +2990,71 @@ def create_empty_model(**kwds):
     output, simulation is steady-state and no coupling is considered. All these settings can be
     changed with optional keywords (see below).
     
-    note: general procedure: key words are the same as those in shemat nml file (but lowercase, as python convention)
+    .. note:: general procedure: key words are the same as those in shemat nml file (but lowercase, as python convention)
     
     **Optional Keywords**:
-        - dx = [] : list of spacing in x-direction
-        - dy = [] : list of spacing in y-direction
-        - dz = [] : list of spacing in z-direction
-        - title = string : set title of simluation NOTE: A SHEMAT PECULIARITY IS THAT THE TYPE OF SIM HAS TO BE DEFINED HERE!
-        - key = 12345 : problem and numerical procedure key; specifically: set as FU--- for fluid and heat flow
-        - stat = inst : if set to inst: transient simulation
-        - kopkng = (4 char word) : coupling info, specifically: C--- : coupling of fluid and heat flow
-        - topt = WSD/ TEMP/ NFLO : thermal top BC; see also: bc_temperature_base
-        - baset = WSD/ TEMP/ NFLO : thermal base BC; see also: bc_temperature_top
-        - seitet = WSD/ TEMP/ NFLO : thermal side BC (set to same value for all sides for now...); see also: bc_temperature_side
-        - transient = True/False : perform transient simulation => 10 Periods, 100 k default setting
-        - monitoring = [[i1,j1,k1],[i2,j2,k2],...,[in,jn,kn]] : list of monitoring positions
+        - *dx* = [] : list of spacing in x-direction
+        - *dy* = [] : list of spacing in y-direction
+        - *dz* = [] : list of spacing in z-direction
+        - *title* = string : set title of simluation NOTE: A SHEMAT PECULIARITY IS THAT THE TYPE OF SIM HAS TO BE DEFINED HERE!
+        - *key* = 12345 : problem and numerical procedure key; specifically: set as FU--- for fluid and heat flow
+        - *stat* = inst : if set to inst: transient simulation
+        - *kopkng* = (4 char word) : coupling info, specifically: C--- : coupling of fluid and heat flow
+        - *topt* = WSD/ TEMP/ NFLO : thermal top BC; see also: bc_temperature_base
+        - *baset* = WSD/ TEMP/ NFLO : thermal base BC; see also: bc_temperature_top
+        - *seitet* = WSD/ TEMP/ NFLO : thermal side BC (set to same value for all sides for now...); see also: bc_temperature_side
+        - *transient* = True/False : perform transient simulation => 10 Periods, 100 k default setting
+        - *monitoring* = [[i1,j1,k1],[i2,j2,k2],...,[in,jn,kn]] : list of monitoring positions
     
-    note: the following keywords are in addition to the standard SHEMAT variables, for simplification and additional features!
-        - nml_filename = string : filename for nml file (extension .nml added as default)
-        - top_heat_flux = int : one value for heat flux assigned to all cells
-        - basal_heat_flux = int : one value for heat flux, assigned to all cells
-        - compute_heat = True/False : set flags to compute heat transport (default = True)
-        - compute_fluid = True/False : set flags to compute fluid flow (default = False)
-        - coupled_fluid_heat = True/False : set flag for coupled simulation (default = True when both computed)
-        - execute_sheamt = True/False : execute SHEMAT directly after model setup
-        - initialize_temp_grad = True/False : set an initial temperature gradient (may speed up computation)
-        - initialize_heads = True/False : set head values in all cells to total z-size of project (more stable?)
-        - set_head = int : set all head values to given number; not working if initialize_heads = True!!
-        - lambda0 = float : thermal conductivity (for the whole model)
+    .. note:: the following keywords are in addition to the standard SHEMAT variables, for simplification and additional features!
+    
+    **Additional Keywords**:
+        - *nml_filename* = string : filename for nml file (extension .nml added as default)
+        - *top_heat_flux* = int : one value for heat flux assigned to all cells
+        - *basal_heat_flux* = int : one value for heat flux, assigned to all cells
+        - *compute_heat* = True/False : set flags to compute heat transport (default = True)
+        - *compute_fluid* = True/False : set flags to compute fluid flow (default = False)
+        - *coupled_fluid_heat* = True/False : set flag for coupled simulation (default = True when both computed)
+        - *execute_sheamt* = True/False : execute SHEMAT directly after model setup
+        - *initialize_temp_grad* = True/False : set an initial temperature gradient (may speed up computation)
+        - *initialize_heads* = True/False : set head values in all cells to total z-size of project (more stable?)
+        - *set_head* = int : set all head values to given number; not working if initialize_heads = True!!
+        - *lambda0* = float : thermal conductivity (for the whole model)
+        - *vtk* = True/ False : toggle output to VTK file (default: True)
 
-    note: the following keywords address some SHEMAT variables with a more meaningful term
-        - bc_temperature_side = 'dirichlet', 'neumann', 'no_flow': lateral thermal boundary conditions
-        - bc_temperature_top = 'dirichlet', 'neumann', 'no_flow': top thermal boundary conditions
-        - bc_temperature_base = 'dirichlet', 'neumann', 'no_flow': base thermal boundary conditions
-        - value_temperature_top = float : fixed temperature at top for dirichlet bc
-        - value_temperature_base = float : fixed temperature at base for dirichlet bc
-        - flux_temperature_top = float : defined heat flux over top for neumann temperature bc
-        - flux_temperature_base = float : defined heat flux over base for neumann temperature bc
-        - bc_flow_side = 'dirichlet', 'neumann', 'no_flow': lateral flow boundary conditions
-        - bc_flow_top = 'dirichlet', 'neumann', 'no_flow': top flow boundary conditions
-        - bc_flow_base = 'dirichlet', 'neumann', 'no_flow': base flow boundary conditions
-        - value_head_top = float : fixed head at top for dirichlet bc
-        - value_head_base = float : fixed head at base for dirichlet bc
-        - flux_flow_top = float : defined fluid flux over top for neumann temperature bc
-        - flux_flow_base = float : defined fluid flux over base for neumann temperature bc
+    .. note:: the following keywords address some SHEMAT variables with a more meaningful term
+    
+    **Additional Keywords for more meaningful BC definition**:
+        - *bc_temperature_side* = 'dirichlet', 'neumann', 'no_flow': lateral thermal boundary conditions
+        - *bc_temperature_top* = 'dirichlet', 'neumann', 'no_flow': top thermal boundary conditions
+        - *bc_temperature_base* = 'dirichlet', 'neumann', 'no_flow': base thermal boundary conditions
+        - *value_temperature_top* = float : fixed temperature at top for dirichlet bc
+        - *value_temperature_base* = float : fixed temperature at base for dirichlet bc
+        - *flux_temperature_top* = float : defined heat flux over top for neumann temperature bc
+        - *flux_temperature_base* = float : defined heat flux over base for neumann temperature bc
+        - *bc_flow_side* = 'dirichlet', 'neumann', 'no_flow': lateral flow boundary conditions
+        - *bc_flow_top* = 'dirichlet', 'neumann', 'no_flow': top flow boundary conditions
+        - *bc_flow_base* = 'dirichlet', 'neumann', 'no_flow': base flow boundary conditions
+        - *value_head_top* = float : fixed head at top for dirichlet bc
+        - *value_head_base* = float : fixed head at base for dirichlet bc
+        - *flux_flow_top* = float : defined fluid flux over top for neumann temperature bc
+        - *flux_flow_base* = float : defined fluid flux over base for neumann temperature bc
      
-    note: the following keywords address functionalities to read the model geometry from a GeoModeller model
-        - update_from_geomodel = True/False
-        - geomodeller_dir = directory_path
-        - geomodel_filename = geomodel_filename
-        - geomodel_properties = csv_file : csv file with model properties (see ge2she)
-        - extent_x = (float, float) : range of geomodel in x-direction (default: model range)
-        - extent_y = (float, float) : range of geomodel in y-direction (default: model range)
-        - extent_z = (float, float) : range of geomodel in z-direction (default: model range)   
+    .. note:: the following keywords address functionalities to read the model geometry from a GeoModeller model
+        
+    **Additional Keywords for geometry functionalities**:    
+        - *update_from_geomodel* = True/False
+        - *geomodeller_dir* = directory_path
+        - *geomodel_filename* = geomodel_filename
+        - *geomodel_properties* = csv_file : csv file with model properties (see ge2she)
+        - *extent_x* = (float, float) : range of geomodel in x-direction (default: model range)
+        - *extent_y* = (float, float) : range of geomodel in y-direction (default: model range)
+        - *extent_z* = (float, float) : range of geomodel in z-direction (default: model range)
+        - *update_from_geology_grid* = True/ False : update geology array from exported grid, with
+        x-dominance and a line break for each z-layer;
+        - *grid_filename* = string : file with exported geology grid
+        - *update_from_voxet_file* = True/ False: update geology properties from voxet file,
+        for example exported from GoCAD voxet object (with GoCAD scripting methods).
     """
     print kwds['dx']
     print kwds['dy']
@@ -3857,12 +3901,14 @@ NFLO
         S1.set_array("QTOP3D", kwds['qtop3d'])
     else:
         if kwds.has_key('top_heat_flux'): S1.set_array("QTOP3D", layer_grid_number * [kwds['top_heat_flux']])
+        elif kwds.has_key('flux_temperature_top'): S1.set_array("QBASAL3D", layer_grid_number * [kwds['flux_temperature_top']])
         else: # in this case: reset length of array only and use first value
             S1.change_array_length("QTOP3D", layer_grid_number)
     if kwds.has_key('qbasal3d'): 
         S1.set_array("QBASAL3D", kwds['qbasald'])
     else:
         if kwds.has_key('basal_heat_flux'): S1.set_array("QBASAL3D", layer_grid_number * [kwds['basal_heat_flux']])
+        elif kwds.has_key('flux_temperature_base'): S1.set_array("QBASAL3D", layer_grid_number * [kwds['flux_temperature_base']])
         else: # in this case: reset length of array only and use first value
             S1.change_array_length("QBASAL3D", layer_grid_number)
 
@@ -3889,11 +3935,11 @@ NFLO
             raise KeyError
     if kwds.has_key('bc_temperature_base'):
         if kwds['bc_temperature_base'] == 'no_flow':
-            S1.set("TOPT", 'NFLO')
+            S1.set("BASET", 'NFLO')
         elif kwds['bc_temperature_base'] == 'dirichlet':
-            S1.set("TOPT", 'TEMP')
+            S1.set("BASET", 'TEMP')
         elif kwds['bc_temperature_base'] == 'neumann':
-            S1.set("TOPT", 'WSD')
+            S1.set("BASET", 'WSD')
         else:
             print("\n\n\tTemperature BC " + kwds['bc_temperature_base'] + " not recognized!")
             print("\tPlease check and try again\n\n")
@@ -4164,21 +4210,31 @@ NFLO
                                                   lower_left_x = lower_left_x,
                                                   lower_left_y = lower_left_y,
                                                   lower_left_z = lower_left_z)
-        if kwds.has_key('geomodel_properties') and kwds['geomodel_properties'] != "":
-            S1.update_properties_from_csv_list(kwds['geomodel_properties'])
     if kwds.has_key('update_from_voxet_file') and kwds['update_from_voxet_file']:
         """update shemat geology array from voxet file, exported from GeoModeller"""
-#        if kwds.has_key('geomodeller_dir'):
-#            chdir(kwds['geomodeller_dir'])
-#        else:
-#            chdir(raw_input('Please enter path of geomodel: '))
-#        if kwds.has_key('geomodel_filename'):
-#            geomodel_file = kwds['geomodel_filename']
-#        else:
-#            geomodel_file = raw_input('Please enter filename of geomodel: ')
         S1.update_model_from_voxet_file(kwds['voxet_filename'], **kwds)
         if kwds.has_key('geomodel_properties') and kwds['geomodel_properties'] != "":
             S1.update_properties_from_csv_list(kwds['geomodel_properties'])
+
+    if kwds.has_key('update_from_geology_grid') and kwds['update_from_geology_grid']:
+        # update model from exported geology grid, for example created with 
+        # the DOS executable exportRectilinearMeshCellCenter.exe
+        # This option is a lot faster than updating the model directly from the xml file
+        f = open(kwds['grid_filename'])
+        lines = f.readlines()
+        f.close()
+        geol = []
+        for line in lines:
+            l = line.split(',')
+            for l1 in l[:-1]:
+                geol.append(int(l1))
+        S1.set_array("GEOLOGY", geol)
+        
+
+    # final step: update properties from csv property file, according to geology
+    if kwds.has_key('geomodel_properties') and kwds['geomodel_properties'] != "":
+        S1.update_properties_from_csv_list(kwds['geomodel_properties'])
+
         
     if kwds.has_key('baset') and kwds['baset']=='TEMP':
         por = S1.get_array("POR")
