@@ -3021,6 +3021,8 @@ def create_empty_model(**kwds):
         - *set_head* = int : set all head values to given number; not working if initialize_heads = True!!
         - *lambda0* = float : thermal conductivity (for the whole model)
         - *vtk* = True/ False : toggle output to VTK file (default: True)
+        - *thermal_cond_function_of_temp* = True/ False : calculate thermal conductivity as a function of temperature,
+        see SHEMAT book pg. 14 for details
 
     .. note:: the following keywords address some SHEMAT variables with a more meaningful term
     
@@ -3046,6 +3048,7 @@ def create_empty_model(**kwds):
         - *update_from_geomodel* = True/False
         - *geomodeller_dir* = directory_path
         - *geomodel_filename* = geomodel_filename
+        - *update_from_property_file* = True/ False: update model variables from property file
         - *geomodel_properties* = csv_file : csv file with model properties (see ge2she)
         - *extent_x* = (float, float) : range of geomodel in x-direction (default: model range)
         - *extent_y* = (float, float) : range of geomodel in y-direction (default: model range)
@@ -4232,8 +4235,12 @@ NFLO
         
 
     # final step: update properties from csv property file, according to geology
-    if kwds.has_key('geomodel_properties') and kwds['geomodel_properties'] != "":
+    if kwds.has_key('update_from_property_file') and kwds['update_from_property_file']:
+        if kwds.has_key('geomodel_properties') and kwds['geomodel_properties'] != "":
+            S1.update_properties_from_csv_list(kwds['geomodel_properties'])
+    elif kwds.has_key('geomodel_properties') and kwds['geomodel_properties'] != "":
         S1.update_properties_from_csv_list(kwds['geomodel_properties'])
+        # the elif statement is required for backwards compatibility...
 
         
     if kwds.has_key('baset') and kwds['baset']=='TEMP':
@@ -4244,6 +4251,12 @@ NFLO
                 por[i] = - por[i]
         S1.set_array("POR", por)
 
+    if kwds.has_key('thermal_cond_function_of_temp') and kwds['thermal_cond_function_of_temp']:
+        # set flag to calculate thermal conductivity as a function of temperature,
+        # see SHEEMAT book pg. 14 for equation
+        koplng = S1.get("KOPLNG")
+        koplng = koplng[:3]+'P'
+        S1.set("KOPLNG",koplng)
     
     if kwds.has_key('equilibrium_layer') and kwds['equilibrium_layer'] > 0:
         # add thermal equilibrium layers at bottom of model
