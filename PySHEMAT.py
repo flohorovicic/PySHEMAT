@@ -1605,6 +1605,7 @@ class Shemat_file:
                     break
             # now determine correct slice; implementation with for-loops
             # as correct array assignment with Python somehow doesn't want to work...
+            print array_pos
             property_slice = []
             for y in range(self.jdim):
                 for x in range(self.idim):
