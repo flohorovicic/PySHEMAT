@@ -24,15 +24,16 @@ Available online 21 October 2011, ISSN 0098-3004, 10.1016/j.cageo.2011.10.011.
 """
 
 # import PySHEMAT module
-from PySHEMAT import *
+import PySHEMAT as PS
+
 # import os methods to adjust working directory
 from os import chdir, getcwd
 
 # change to directory where output file (.nlo) is located
-chdir(r'C:\GeoModels\test_PySHEMAT\simple_example_1')
+chdir(r'/Users/wel181/Documents/10_Geomodels/01_PySHEMAT/simple_model')
 
 # create Shemat object for output file
-S1_out = Shemat_file(filename='conv_ex_1.nlo')
+S1_out = PS.Shemat_file(filename='conv_ex_1.nlo')
 
 # calculate mean temperature
 mean_temp = S1_out.calc_global_mean_value("# TEMP")
