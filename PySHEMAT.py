@@ -459,9 +459,9 @@ class Shemat_file:
                         elif var_name == "GEOLOGY": # or var_name == "ANISOJ" or var_name == "ANISOI":
                             # integer value
                             value += "%d " % val
-                        elif var_name == "QBASAL3D":
-                            # assign three digits
-                            value += "%.3e " % val
+                        elif var_name == "QBASAL3D" or var_name == "# QBASAL3D":
+                            # assign four digits
+                            value += "%.4e " % val
                         elif kwds.has_key('float_type'):
                             if kwds['float_type'] == 'high_res':
                                 value += "%.2e " % val
