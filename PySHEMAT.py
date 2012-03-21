@@ -20,6 +20,8 @@ Available online 21 October 2011, ISSN 0098-3004, 10.1016/j.cageo.2011.10.011.
 """
 
 import re # for regular expression fit, neccessary for stupid nlo files
+from matplotlib import use
+use("Agg")
 import matplotlib as m
 
 class Shemat_file:
@@ -1605,7 +1607,6 @@ class Shemat_file:
                     break
             # now determine correct slice; implementation with for-loops
             # as correct array assignment with Python somehow doesn't want to work...
-            print array_pos
             property_slice = []
             for y in range(self.jdim):
                 for x in range(self.idim):
@@ -1615,6 +1616,92 @@ class Shemat_file:
             raise AttributeError
 
         return property_slice
+    
+    def get_array_pos_xyz(self,x,y,z,**kwds):
+        """Determine the array position of a real-world coordinate value
+        
+        The function determines the position in the SHEMAT 1-D arrays of a 
+        coordinate value, given as (x,y,z) real-world coordinates; function
+        can be used to search for a several values first, and then load the
+        data arrays and determine values for all positions at once to speed up
+        search (originally programmed to speed-up calibration with multiple
+        wells).
+        
+        **Arguments**:
+             - *x,y,z* = floats : position of values
+
+        **Optional Keywords**:
+            - *relative* = True/ False: relative to model origin (i.e.: not in real-world
+            coordinates).
+            - *check_out_of_bounds* = True/ False: check if point is actually within model range
+            (otherwise, wrong results might be obtained or the method can crash). The check
+            can be deactivated to speed up calculation. Default: check is performed!
+            - *three-d* = True/ False: return a tuple of positions in i,j,k coordinates, i.e.
+            the array position in 3-D as (i,j,k).
+
+        **Returns**:
+             integer of array position corresponding to value
+        """
+        if kwds.has_key('relative') and kwds['relative']:
+            # get value relative to model origin, not in real-world coordinates!
+            origin_x = 0
+            origin_y = 0
+            origin_z = 0
+        else:
+            try:
+                self.origin_z
+            except AttributeError:
+                self.get_model_origin()
+            origin_x = self.origin_x
+            origin_y = self.origin_y
+            origin_z = self.origin_z
+
+        if kwds.has_key('check_out_of_bounds') and kwds['check_out_of_bounds'] == False:
+            pass
+        else:
+            # default: perform check
+            # first: check if value is smaller than origin
+            if x < origin_x:
+                print "Position %s is out of bounds for direction x (min: %.2f)" % (x, origin_x)
+                raise ValueError
+            if y < origin_y:
+                print "Position %s is out of bounds for direction y (min: %.2f)" % (x, origin_x)
+                raise ValueError
+            if z < origin_z:
+                print "Position %s is out of bounds for direction z (min: %.2f)" % (x, origin_x)
+                raise ValueError
+                
+            
+            try:
+                self.boundaries_x
+            except AttributeError:
+                self.get_cell_boundaries()
+    
+            for i,x_bound in enumerate(self.boundaries_x):
+                if (x - origin_x) > self.boundaries_x[-1]:
+                    print "Position %s is out of bounds for direction x (max: %.2f)" % (x, self.boundaries_x[-1]+origin_x)
+                    raise ValueError
+                if x_bound > (x - origin_x): 
+                    x_pos = i-1 # array position corresponds to cell centre of cell before boundary!
+                    break
+            for j,y_bound in enumerate(self.boundaries_y):
+                if (y - origin_y) > self.boundaries_y[-1]:
+                    print "Position %s is out of bounds for direction y (max: %.2f)" % (y, self.boundaries_y[-1]+origin_y)
+                    raise ValueError
+                if y_bound > (y - origin_y): 
+                    y_pos = j-1 # array position corresponds to cell centre of cell before boundary!
+                    break
+            for k,z_bound in enumerate(self.boundaries_z):
+                if (z - origin_z) > self.boundaries_z[-1]:
+                    print "Position %s is out of bounds for direction z (max: %.2f)" % (z, self.boundaries_z[-1]+origin_z)
+                    raise ValueError
+                if z_bound > (z - origin_z): 
+                    z_pos = k-1 # array position corresponds to cell centre of cell before boundary!
+                    break
+            if kwds.has_key("three_d") and kwds['three_d'] == True:
+                return (x_pos,y_pos,z_pos)
+            else:
+                return x_pos + self.idim * y_pos + self.idim * self.jdim * z_pos
     
     def get_value_xyz(self,property,x,y,z,interpolate=True,**kwds):
         """Get the (interpolated )value of the property at real-world position
@@ -1628,6 +1715,8 @@ class Shemat_file:
         **Arguments**:
             - *property* = string : SHEMAT property variable name, e.g. TEMP for temperature
             - *x,y,z* = floats : position of values
+            - *interpolate* = True/ False: approximate true value at position x,y,z (*not* the value of the cell!)
+            through trilinear interpolation
         
         **Optional Keywords**:
             - *relative* = True/ False: relative to model origin (i.e.: not in real-world
@@ -1763,6 +1852,8 @@ class Shemat_file:
     def determine_array_pos(self,i,j,k):
         """Determine the position of an element in property array
         
+        ..Note: deprecated function, use self.get_array_pos_ijk() instead!!
+        
         The SHEMAT properties are stored in 1-D array structures, in
         x-, y-, z-dominance. This function determines the corresponding
         position of an element in the 1-D array from the grid coordinate
@@ -1776,7 +1867,22 @@ class Shemat_file:
         """
         return i + self.idim * j + self.idim * self.jdim * k
                 
-                
+    def get_array_pos_ijk(self,i,j,k):
+        """Determine the position of an element in property array
+        
+        The SHEMAT properties are stored in 1-D array structures, in
+        x-, y-, z-dominance. This function determines the corresponding
+        position of an element in the 1-D array from the grid coordinate
+        position (i,j,k) and the number of cells in each direction.
+        
+        **Arguments**:
+            - *i,j,k* = int : grid coordinate position of cell
+            
+        **Returns**:
+            i = int : corresponding position in 1-D array
+        """
+        return i + self.idim * j + self.idim * self.jdim * k
+        
 
     def get_profile_xy(self,property,x,y,**kwds):
         """get property profile at real-world position x,y. e.g. the temperature
