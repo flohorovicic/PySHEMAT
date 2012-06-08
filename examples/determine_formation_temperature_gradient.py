@@ -39,3 +39,9 @@ S1.create_2D_property_plot(temp_grad_xy,
 # create an ASCII grid file e.g. for import into ArcGIS or processing with GMT
 A1 = S1.grid_2D_to_ASCII_grid(temp_grad_xy)
 A1.write_file(filename = "temperature_gradient.txt")
+
+# create a gmt script for a high-quality eps graphics of the grid
+# NOTE: this script will only run if GMT is installed;
+# GMT an awesome free mapping tool, see: http://gmt.soest.hawaii.edu/
+A1.create_gmt_plot_script()
+

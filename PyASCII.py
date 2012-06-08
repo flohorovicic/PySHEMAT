@@ -741,10 +741,103 @@ class ASCII_File:
         else:
             savefig('ascii_grid.png')
         
+    def get_gmt_range(self):
+        """Determine the (x,y) range of the grid in the format used by GMT
+        
+        The typical GMT format is: -Rmin_x/max_x/min_y/max_y
+        """
+        min_x = self.header['xllcorner']
+        min_y = self.header['yllcorner']
+        max_x = min_x + self.header['nrow'] * self.header['cellsize']
+        max_y = min_y + self.header['ncol'] * self.header['cellsize']
+        return "-R%05.2f/%05.2f/%05.2f/%05.2f" % (min_x, max_x, min_y, max_y)
+        
+    def create_netcdf_file(self, **kwds):
+        """Create a netcdf gridfile from ASCII grid, using GMT
+        
+        ..Note..: This function is only working if GMT is installed and in the search path!
+        
+        **Optional Keywords**:
+            - *
+        """
+        # In a first step, the ASCII grid file has to be saved to a temporary file; this file is
+        # later deleted in the gmt-script
+        self.write_file(filename = "tmpgrid.txt") 
+        
+        if kwds.has_key("netcdf_filename"):
+            netcdf_filename = kwds['netcdf_filename']
+        else:
+            netcdf_filename = "tmp.grd"
+        
+        gmt_range = self.get_gmt_range() 
+         
+        gmtscript = "#!/bin/bash\n"
+        gmtscript += "xyz2grd tmpgrid.txt -G" + netcdf_filename + " -E -V " + gmt_range + "\n"
+        
+        gmt_file = open("create_netcdf_file.gmt", "w")
+        gmt_file.write(gmtscript)
+        # run conversion script if keyword is defined
+        if kwds.has_key("run_conversion") and kwds['run_conversion']:
+            import subprocess
+            my_proc=subprocess.Popen('bash ./create_netcdf_file.gmt',shell=True)
+            my_proc.wait()
+        
+    def create_gmt_plot_script(self, **kwds):
+        """Create a GMT script to create a high-quality eps figure
+        
+        This function creates a script file that can be executed on the command line
+        if GMT is installed. The file is a bash script file per default. A DOS file can
+        be created with the keyword DOS=True
+        """
+        # In a first step, the ASCII grid file has to be saved to a temporary file; this file is
+        # later deleted in the gmt-script
+        print("\n\tNote: a lot of hardcoded stuff in this GMT script!\n")
+        print("\tFor better scales: try multiplying by 1000\n\n")
+        self.write_file(filename = "tmpgrid.txt") 
+ 
+        if kwds.has_key("netcdf_filename"):
+            netcdf_filename = kwds['netcdf_filename']
+        else:
+            netcdf_filename = "tmp.grd"
+        
+        gmt_range = self.get_gmt_range() 
+         
+        self.script = []
+        self.script.append("#!/bin/bash")
+        
+        # set some fancy GMT default values
+        self.script.append( 'gmtset PAPER_MEDIA                Custom_5mx30m')
+        self.script.append('gmtset ANNOT_MIN_SPACING           0p')
+        self.script.append('gmtset ANNOT_FONT_SIZE_PRIMARY    10p')
+        self.script.append('gmtset ANNOT_FONT_SIZE_SECONDARY  10p')
+        self.script.append('gmtset HEADER_FONT_SIZE           10p')
+        self.script.append('gmtset LABEL_FONT_SIZE            12p')
+        self.script.append('gmtset TICK_LENGTH              0.1c')
+        self.script.append('# End of header \n')
+        
+        # convert ascii grid file to netcdf format
+        self.script.append("xyz2grd tmpgrid.txt -G" + netcdf_filename + " -E -V " + gmt_range)
+        
+        # create color palette table matching to grid file
+        self.script.append("grd2cpt " + netcdf_filename + " -Cjet > mygrid.cpt\n")
+        
+        # now create grid file 
+        self.script.append('grdimage ' + netcdf_filename + ' ' + gmt_range + ' -JX3i -B500:."Temperature Gradient:" -Cmygrid.cpt -P -K > out.ps\n')
+        
+        # append scalebar
+        self.script.append('psscale -Cmygrid.cpt -D3.7i/1.55i/2.88i/0.4i -O -I0.3 -Ac -Ba0.005f0.001:Gradient:/:C/km: >> out.ps')
+        
+        # for a better output (i.e. cropped bounding box, etc.):
+        self.script.append("ps2epsi out.ps\nmv out.epsi gridfile.eps") 
+        fh=open('gmt_script.sh','w')
+        for line in self.script:
+            fh.write(line + "\n")
+        fh.close()
+        
+        
+        
 
-
-
-
+        
 
            
 
