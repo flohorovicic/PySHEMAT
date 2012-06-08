@@ -36,3 +36,6 @@ S1.create_2D_property_plot(temp_grad_xy,
                            ylabel = 'N-S [km]',
                            colorbar = True)
 
+# create an ASCII grid file e.g. for import into ArcGIS or processing with GMT
+A1 = S1.grid_2D_to_ASCII_grid(temp_grad_xy)
+A1.write_file(filename = "temperature_gradient.txt")

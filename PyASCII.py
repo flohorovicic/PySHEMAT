@@ -52,7 +52,6 @@ class ASCII_File:
             # store data in list to avoid problems of pointer in file...
             self.data = self.f_ascii.readlines()
         else:
-            print "No File given, empty ASCII File Object created (all Values = NODATA_value)"
             # create default Attributes
             self.header = {}
             self.data = []
@@ -816,16 +815,16 @@ if __name__ == '__main__':
 #    print
 #    print A1.data_array[2][4]
 #    print A1.data_array_3D[2][4]
-    A1.calculate_histogram()
-    print A1.hist_data
-    # A1.plot_ASCII_grid_2D()
-    print "Calculate min/max values"
-    print min(A1.hist_data)
-    print max(A1.hist_data)
-
-#    chdir(r'C:\GeoModels\Geothermal_Resource_Base\Talk_AGEC\Model_2\export\shemat_lowres\nml_run_2')
-#    S1 = Shemat_file('agec2_2_lowres_model.nml')
-    A1.plot_ASCII_grid_2D()
+#    A1.calculate_histogram()
+#    print A1.hist_data
+#    # A1.plot_ASCII_grid_2D()
+#    print "Calculate min/max values"
+#    print min(A1.hist_data)
+#    print max(A1.hist_data)
+#
+##    chdir(r'C:\GeoModels\Geothermal_Resource_Base\Talk_AGEC\Model_2\export\shemat_lowres\nml_run_2')
+##    S1 = Shemat_file('agec2_2_lowres_model.nml')
+#    A1.plot_ASCII_grid_2D()
     form_id = 6
     temperature_xy = S1.calc_mean_formation_value(form_id, "TEMP")
     print temperature_xy
