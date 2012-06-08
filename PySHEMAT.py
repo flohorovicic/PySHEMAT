@@ -20,8 +20,8 @@ Available online 21 October 2011, ISSN 0098-3004, 10.1016/j.cageo.2011.10.011.
 """
 
 import re # for regular expression fit, neccessary for stupid nlo files
-from matplotlib import use
-use("Agg")
+# from matplotlib import use
+# use("Agg")
 import matplotlib as m
 
 class Shemat_file:
@@ -48,6 +48,7 @@ class Shemat_file:
         
         **Arguments**:
             - *new_filename* = string: filename in case an empty file is created
+            - *filename* = string : filename of SHEMAT file to load
         
         **Optional keywords**:
             - *offscreen* = True/False: set variables for offscreen rendering, e.g. to create plots on
