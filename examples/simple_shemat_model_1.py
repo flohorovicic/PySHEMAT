@@ -30,9 +30,13 @@ import os
 # change to some working directory
 if os.name == 'nt':
     # windows
-    os.chdir(r'C:\GeoModels\test_PySHEMAT\simple_example_1')
+    os.chdir(r'C:\path\to\local\simulation\directory')
 elif os.name == 'mac':
-    os.chdir(r'C:\GeoModels\test_PySHEMAT\simple_example_1')
+    # Mac
+    os.chdir(r'/path/to/local/simulation/directory/')
+elif os.name == 'posix':
+    # Linux
+    os.chdir(r'/path/to/local/simulation/directory/')
 
 dx = 50 * ones(50)
 dy = 50 * ones(50)

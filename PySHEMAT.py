@@ -302,7 +302,11 @@ class Shemat_file:
                         try:
                             data.append(float(d))
                         except ValueError:
-                            print "Problem with value, probably empty string: " + d
+                            print "Possibly a problem with a value, probably empty string: " + d
+                            print "While reading %s " % var_name
+                            print "If all values are correct, this error could be due to an incorrect"
+                            print "line ending, for example when opening a file created on a windows machine"
+                            print "with PySHEMAT on Linux or Mac"
         # check, if Boundary Conditions are affected
         if var_name == "POR" or var_name == "PERM" or var_name == "PRES":
             # check, if bcs are already read:
@@ -1247,6 +1251,62 @@ class Shemat_file:
                         local_isopach += float(delz[k])
                 isopach_xy.append(local_isopach)             
         return isopach_xy
+    
+    def calc_formation_temp_gradient(self, formation_id):
+        """Calculate the 1-D temperature gradient within one formation
+        
+        Function calculates temperature gradient in z-direction in one formation and
+        returns (x,y)-values in a list, e.g. to create maps of temperature gradients
+        
+        ..Note..: The function only works properly for formations continuous in z-direction
+        
+        **Arguments**:
+            - *formation_id* = int : corresponding to the property id in Shemat/ Geology Variable
+        
+        **Returns**:
+            *temp_gradient_xy[n]* = list : 1D list of isopach values
+        """
+        # load geology data to xyz array
+        geology_xyz = self.get_array_as_xyz_structure("GEOLOGY")
+        # load temperature data to xyz array
+        temperature_xyz = self.get_array_as_xyz_structure("# TEMP") 
+        # get cell centres
+        cell_centres = self.get_cell_centres()
+        
+        # now, iterate over x,y in geology array
+        idim = int(self.get("IDIM"))
+        jdim = int(self.get("JDIM"))
+        kdim = int(self.get("KDIM"))
+        print idim,jdim,kdim
+        temp_gradient_xy = []
+        for j in range(jdim):
+            for i in range(idim):
+                in_formation = False
+                max_reached = False
+                for k in range(kdim):
+                    if not in_formation and (geology_xyz[i][j][k] == formation_id):
+                        # lower boundary
+                        min_temp = temperature_xyz[i][j][k]
+                        z_min = self.centre_z[k]
+                        in_formation = True
+                    elif in_formation and (geology_xyz[i][j][k] != formation_id):
+                        # first cell above formation
+                        max_temp = temperature_xyz[i][j][k-1]
+                        z_max = self.centre_z[k-1]
+                        max_reached = True
+                    # if max_reached, calculate temperature gradient
+                    if max_reached:
+                        if not (z_min == z_max):
+                            temp_gradient_xy.append((max_temp - min_temp) / (z_min - z_max))
+                        else:
+                            print("Problem with values: z_min equal to z_max!")
+                            print("Temperature gradient is set to 0")
+                            temp_gradient_xy.append(0.)
+                        break # loop in z-direction
+        return temp_gradient_xy
+       
+        
+        
          
     def property_xy_to_2D_points(self, property_xy):
         """create a list with coordinates and property values, e.g. for
