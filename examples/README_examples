@@ -1,0 +1,25 @@
+Examples to test PySHEMAT
+
+simple_shemat_model_1.py:
+Create a simple convection model, example from paper
+
+simple_shemat_model_1_plot.py:
+Calculate mean temperatures (z-direction) in simulated
+model and create plot of results
+
+To run these examples:
+- copy in local directory and adjust path, if required;
+- create the input file (.nml) with the first script,
+- run simulation (e.g. from command line: change into directory
+where .nml file is located and run command 'shemat'; make sure
+that the path to the shemat executable is in the PATH environment
+variable; for windows: adjust with:
+Control Panel -> System Properties -> Advanced -> Environment Variables)
+(simulation should take several seconds only)
+- After simulation: .nlo file should be created in directory, the
+PERIOD1 folder contains a .vtk file of results, can be visualized with
+any VTK viewer, e.g. the free program Mayavi
+- run script simple_shemat_model_1_plot.py to create a png-plot
+of mean temperatures in vertical direction, cleary showing the position
+of the convection cells;
+
