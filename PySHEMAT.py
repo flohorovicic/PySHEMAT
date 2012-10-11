@@ -748,6 +748,12 @@ class Shemat_file:
         Optional property lines in .csv-file:
         PERM_FUNC: indicating that definition of permeability function in following lines
         PERM_RANDOM: indicating that definition of permeability random distribution follows
+
+	WLFM0_RANDOM: indicating that thermal conductivity random distribution follows
+	RHOCM_RANDOM: indicating that thermal diffusivity random distribution follows
+
+	
+
         """
         geol = self.get_array("GEOLOGY")
         # open csv file
