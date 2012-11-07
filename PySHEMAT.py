@@ -1951,6 +1951,32 @@ class Shemat_file:
         return i + self.idim * j + self.idim * self.jdim * k
         
 
+    def get_all_profiles(self,property_name,**kwds):
+        """Get z-profiles at every x,y position in model and return as list of dictionaries
+        
+        **Arguments**:
+            - *property_name* = string : name of SHEMAT property to extract (e.g. "# TEMP")
+        """
+        # get property array
+        property_xyz = self.get_array_as_xyz_structure(property_name)
+        
+        idim = int(self.get("IDIM"))
+        jdim = int(self.get("JDIM"))
+        
+        profiles = []
+        
+        for i in range(idim):
+            for j in range(jdim):
+                profile = {}
+                profile['i'] = i
+                profile['j'] = j
+                profile['values'] = property_xyz[i][j]
+                profiles.append(profile)
+        
+        return profiles
+         
+
+
     def get_profile_xy(self,property,x,y,**kwds):
         """get property profile at real-world position x,y. e.g. the temperature
         profile with depth; returns a 1-D array
