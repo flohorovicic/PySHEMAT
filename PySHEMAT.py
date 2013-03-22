@@ -20,8 +20,8 @@ Available online 21 October 2011, ISSN 0098-3004, 10.1016/j.cageo.2011.10.011.
 """
 
 import re # for regular expression fit, neccessary for stupid nlo files
-from matplotlib import use
-use("Agg")
+# from matplotlib import use
+# use("Agg")
 import matplotlib as m
 
 class Shemat_file:
@@ -48,6 +48,7 @@ class Shemat_file:
         
         **Arguments**:
             - *new_filename* = string: filename in case an empty file is created
+            - *filename* = string : filename of SHEMAT file to load
         
         **Optional keywords**:
             - *offscreen* = True/False: set variables for offscreen rendering, e.g. to create plots on
@@ -305,7 +306,8 @@ class Shemat_file:
                             print "While reading %s " % var_name
                             print "If all values are correct, this error could be due to an incorrect"
                             print "line ending, for example when opening a file created on a windows machine"
-                            print "with PySHEMAT on Linux or Mac"        # check, if Boundary Conditions are affected
+                            print "with PySHEMAT on Linux or Mac"
+        # check, if Boundary Conditions are affected
         if var_name == "POR" or var_name == "PERM" or var_name == "PRES":
             # check, if bcs are already read:
             try:
@@ -389,6 +391,26 @@ class Shemat_file:
                             elif var_name == "PERM":
                                 self.diri_head.append(tmp)
         return True
+    
+    def update_bcs(self):
+        """Update boundary conditions after changing arrays self.diri_temp, etc.
+        Dirichlet boundary conditions are stored in a .nml file as:
+        - conc: negative PRES values
+        - temp: negative POR values
+        - head: neagitve PERM values
+        
+        With this method, boundary conditions are evaluated and stored in
+        object variables self.diri_temp, self.diri_conc, and self.diri_head
+        
+        ..note : Only works, if self.diri_temp, self.diri_conc, self.diri_head are already object attributes!
+        
+        """
+        por = self.get_array("POR")
+        self.set_array("POR", por)
+        perm = self.get_array("PERM")
+        self.set_array("PERM", perm)
+        pres = self.get_array("PRES")
+        self.set_array("PRES", pres)
 
     
     def set(self, var_name, value, line=1):
@@ -619,28 +641,6 @@ class Shemat_file:
                     n += 1
         return data
     
-    def xyz_structure_to_array_object(self, array):
-        """restructure data[i][j][k] back into array
-        
-        i,j,k are counters in x,y,z-direction, determined from the object itself
-        
-        **Arguments**:
-            - *array* = list or array to be restructured
-        
-        **Returns**:
-            1-D array
-        """
-        # initialize output array
-        data = []
-        
-        # now, fill data structure in z,y,x loops for correct x,y,z order
-        for k in range(self.kdim):
-            for j in range(self.jdim):
-                for i in range(self.idim):
-                    data.append(array[i][j][k])
-        return data
-
-    
     def array_to_xyz_structure(self,array,idim,jdim,kdim):
         """restructure array into x,y,z 3-D structure as data[i][j][k]
         
@@ -768,6 +768,12 @@ class Shemat_file:
         Optional property lines in .csv-file:
         PERM_FUNC: indicating that definition of permeability function in following lines
         PERM_RANDOM: indicating that definition of permeability random distribution follows
+
+	WLFM0_RANDOM: indicating that thermal conductivity random distribution follows
+	RHOCM_RANDOM: indicating that thermal diffusivity random distribution follows
+
+	
+
         """
         geol = self.get_array("GEOLOGY")
         # open csv file
@@ -1271,7 +1277,7 @@ class Shemat_file:
                         local_isopach += float(delz[k])
                 isopach_xy.append(local_isopach)             
         return isopach_xy
-
+    
     def calc_formation_temp_gradient(self, formation_id):
         """Calculate the 1-D temperature gradient within one formation
         
@@ -1325,7 +1331,8 @@ class Shemat_file:
                         break # loop in z-direction
         return temp_gradient_xy
        
-
+        
+        
          
     def property_xy_to_2D_points(self, property_xy):
         """create a list with coordinates and property values, e.g. for
@@ -1963,6 +1970,7 @@ class Shemat_file:
         """
         return i + self.idim * j + self.idim * self.jdim * k
         
+
     def get_all_profiles(self,property_name,**kwds):
         """Get z-profiles at every x,y position in model and return as list of dictionaries
         
@@ -1987,8 +1995,8 @@ class Shemat_file:
         
         return profiles
          
-         
-         
+
+
     def get_profile_xy(self,property,x,y,**kwds):
         """get property profile at real-world position x,y. e.g. the temperature
         profile with depth; returns a 1-D array
@@ -3269,6 +3277,8 @@ def create_empty_model(**kwds):
         x-dominance and a line break for each z-layer;
         - *grid_filename* = string : file with exported geology grid
         - *update_from_voxet_file* = True/ False: update geology properties from voxet file,
+        - *vertical_model_from_png_image* = True/ False: create a model with geology defined in a png image
+        - *image_array* = numpy.ndarray : 2-D array of image
         for example exported from GoCAD voxet object (with GoCAD scripting methods).
     """
     print kwds['dx']
@@ -4340,6 +4350,8 @@ NFLO
             print("\tPlease adjust and try again!\n\n")
             raise KeyError
         S1.set_array("# TEMP", temp)
+        # update bcs
+        S1.diri_temp[-n_layer:] = ones(n_layer)
         
     if kwds.has_key('bc_temperature_base') and kwds['bc_temperature_base'] == "dirichlet":
         # set temperature at base of model
@@ -4355,6 +4367,10 @@ NFLO
             raise KeyError
 
         S1.set_array("# TEMP", temp)
+        S1.diri_temp[:n_layer] = ones(n_layer)
+        
+    # update boundary conditions, otherwise not set correctly (as negative POR, PERM, ..)
+    S1.update_bcs()
     
     
     if kwds.has_key('random_perm_flux_sigma') and kwds['random_perm_flux_sigma'] > 0    :
@@ -4444,6 +4460,19 @@ NFLO
             for l1 in l[:-1]:
                 geol.append(int(l1))
         S1.set_array("GEOLOGY", geol)
+        
+    if kwds.has_key('vertical_model_from_png_image') and kwds['vertical_model_from_png_image']:
+        print("Create a model with vertical geology defined from png figure")
+         
+        geol = kwds['image_array']
+        
+        # flip image
+        geol = geol[::-1,:]
+         
+        geol = geol.ravel()
+         
+        S1.set_array("GEOLOGY", geol)
+            
         
 
     # final step: update properties from csv property file, according to geology
