@@ -2119,6 +2119,7 @@ class Shemat_file:
             - *vmin* = float : z-scale for image plot
             - *vmax* = float
             - *vertical_ex* = float : vertical exegeration, if set to 1: real aspect ratios
+            - *xkcd* = True/False : create XKCD-style geeky plots - more for fun than publications
         """ 
         # reshape data
         idim = int(self.get("IDIM"))
@@ -2291,6 +2292,22 @@ class Shemat_file:
                 cbar2 = fig.colorbar(cax2)
                 if kwds.has_key('colorbar_label'):
                     cbar.set_label(kwds['colorbar_label'])
+
+        # give the plots a hand-drawn XKCD-style look
+        if kwds.has_key('xkcd') and kwds['xkcd']:
+            import os
+            import urllib2
+            if not os.path.exists('Humor-Sans.ttf'):
+                fhandle = urllib2.urlopen('http://antiyawn.com/uploads/Humor-Sans.ttf')
+                open('Humor-Sans.ttf', 'wb').write(fhandle.read())
+
+            import matplotlib.font_manager as fm
+            # Change all the fonts to humor-sans.
+            prop = fm.FontProperties(fname='Humor-Sans.ttf', size=16)
+            for text in ax.texts:
+                text.set_fontproperties(prop)
+    
+
 
         if kwds.has_key('show') and kwds['show'] == True:
             plt.show()  

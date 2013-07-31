@@ -1,6 +1,9 @@
 """
 Example script to create a simple plot with PySHEMAT
 
+Note: this is a bit of a geeky version of simple_shemat_model_1_plot.py :-) more for fun than for publications...
+
+
 This script can be used to plot the results of the simple model created with
 simple_shemat_model_1.py
 
@@ -22,6 +25,7 @@ If you use PySHEMAT for a scientific study, please cite our publication in Compu
 J. Florian Wellmann, Adrian Croucher, Klaus Regenauer-Lieb, Python scripting libraries for subsurface fluid and heat flow simulations with TOUGH2 and SHEMAT, Computers & Geosciences, 
 Available online 21 October 2011, ISSN 0098-3004, 10.1016/j.cageo.2011.10.011.
 """
+
 
 import sys
 sys.path.append(u'/Users/flow/git/PySHEMAT')
@@ -55,7 +59,8 @@ S1_out.create_2D_property_plot(mean_temp,
             xlabel='E-W [km]',
             ylabel='N-S [km]',
             savefig=True,
-            filename='mean_temp.png')
+            xkcd=True,  # create XKCD-style plots :-)
+            filename='mean_temp_geeky.png')
 
 print("Mean temperature figure in folder\n" + getcwd())
 
