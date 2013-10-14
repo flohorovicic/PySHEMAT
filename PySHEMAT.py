@@ -1522,10 +1522,8 @@ class Shemat_file:
         vmax = float
         aspect = float, 'auto', 'equal' : define aspect ratio of plot
         contour = True/False: add contour lines"""
+        print "create slice plot"
         property_xy = self.get_slice(property, direction, position)
-        print 80 * "*"
-        print "\n\tCheck passing of keywords!!\n\n"
-        print 80 * "*"
         self.create_2D_property_plot(property_xy, direction=direction, **kwds)
 
 
@@ -2990,7 +2988,6 @@ class Shemat_file:
         V1.set_scalar_values_list(self.get_array(property))
         V1.set_scalar_name(property)
         return V1
-        
 
 # ********************************************************************
 
