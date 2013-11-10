@@ -23,6 +23,7 @@ import re # for regular expression fit, neccessary for stupid nlo files
 # from matplotlib import use
 # use("Agg")
 import matplotlib as m
+import numpy as np
 
 class Shemat_file:
     """Class for SHEMAT simulation input and output files
@@ -1023,6 +1024,24 @@ class Shemat_file:
                         print "original array length: %d" % len(ori_array)
                     n += 1
         return data
+
+    def get_np_array(self, var_name):
+        """Get variable as 3-D numpy array
+
+        ..Note: due to SHEMAT array set-up, the order is z-dominant (array[z,y,x])   
+
+        **Arguments**:
+            - *var_name* = string : Name of SHEMAT variable
+        """
+        # read array from SHEMAT file
+        ori_array = np.arary(self.get_array(var_name))
+        # read array length from SHEMAT file
+        idim = int(self.get("IDIM"))
+        jdim = int(self.get("JDIM"))
+        kdim = int(self.get("KDIM"))
+        return ori_array.reshape((kdim, jdim, idim))      
+
+
     
     def calc_mean_formation_temp(self, formation_id):
         """Caluclate the mean temperature for one formation at each location
