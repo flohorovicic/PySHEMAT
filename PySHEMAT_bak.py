@@ -23,7 +23,6 @@ import re # for regular expression fit, neccessary for stupid nlo files
 # from matplotlib import use
 # use("Agg")
 import matplotlib as m
-import numpy as np
 
 class Shemat_file:
     """Class for SHEMAT simulation input and output files
@@ -1024,24 +1023,6 @@ class Shemat_file:
                         print "original array length: %d" % len(ori_array)
                     n += 1
         return data
-
-    def get_np_array(self, var_name):
-        """Get variable as 3-D numpy array
-
-        ..Note: due to SHEMAT array set-up, the order is z-dominant (array[z,y,x])   
-
-        **Arguments**:
-            - *var_name* = string : Name of SHEMAT variable
-        """
-        # read array from SHEMAT file
-        ori_array = np.array(self.get_array(var_name))
-        # read array length from SHEMAT file
-        idim = int(self.get("IDIM"))
-        jdim = int(self.get("JDIM"))
-        kdim = int(self.get("KDIM"))
-        return ori_array.reshape((kdim, jdim, idim))      
-
-
     
     def calc_mean_formation_temp(self, formation_id):
         """Caluclate the mean temperature for one formation at each location
@@ -1614,6 +1595,7 @@ class Shemat_file:
             pass # no title at all
 #            fig.text(0.5,0.95,main_title,horizontalalignment='center',verticalalignment='top', fontsize=20)
         if kwds.has_key('colorbar') and kwds['colorbar']==True:
+            print("Set colobar orientation to %s" % orientation)
             cbar = fig.colorbar(cax, orientation=orientation) #, ticks=[-1,0,1])
         if kwds.has_key('grid') and kwds['grid']==True: ax.grid()
     #    cbar.ax.set_yticklabels(['< -1','0','> 1'])    
@@ -2132,6 +2114,7 @@ class Shemat_file:
             - *show* = True/False : show plot
             - *savefig* = True/False : save figure to file
             - *filename* = string : figure filename
+            - *add_to_ax* = matplotlib.plt.axis object : add plot to this axis
             - *cmap* = colormap name for image (cm.colormap)
             - *vmin* = float : z-scale for image plot
             - *vmax* = float
@@ -2190,11 +2173,14 @@ class Shemat_file:
             ax = fig.add_subplot(1,2,1)
             fig.subplots_adjust(wspace=0.3)        
         else:
-            fig = plt.figure()
-#            if kwds.has_key('vertical_ex'):
-#                ax = fig.add_axes([0.2,0.2,0.6,0.6])
-#            else:
-            ax = fig.add_subplot(1,1,1)
+            if kwds.has_key("add_to_ax"):  # add to existing axis
+                ax = kwds['add_to_ax']
+            else: # create new matplotlib axis
+                fig = plt.figure()
+    #            if kwds.has_key('vertical_ex'):
+    #                ax = fig.add_axes([0.2,0.2,0.6,0.6])
+    #            else:
+                ax = fig.add_subplot(1,1,1)
             if kwds.has_key('xlabel'):
                 ax.set_xlabel(kwds['xlabel'])
             elif kwds.has_key('xscale'):
@@ -2274,7 +2260,7 @@ class Shemat_file:
 
         if kwds.has_key('two_plots') and kwds['two_plots'] == True:
             ax.set_title("True voxel locations")
-        if kwds.has_key('title'):
+        if kwds.has_key('title') and not kwds.has_key('add_to_ax'):
             main_title = kwds['title']
             fig.text(0.5,0.95,main_title,horizontalalignment='center',verticalalignment='top', fontsize=18)
         else:
@@ -2282,9 +2268,18 @@ class Shemat_file:
 #            fig.text(0.5,0.95,main_title,horizontalalignment='center',verticalalignment='top', fontsize=20)
         if kwds.has_key('colorbar') and kwds['colorbar']==True:
             if kwds.has_key('colorbar_orientation'):
-                cbar = fig.colorbar(cax, orientation=kwds['colorbar_orientation'])
+                try:
+                    cbar = fig.colorbar(cax, orientation=kwds['colorbar_orientation'])
+                except UnboundLocalError:
+                    print("\n\n\tColorbar can not be added internally when axis is passed!\n\n\n")
+                    raise UnboundLocalError
             else:
-                cbar = fig.colorbar(cax) #, ticks=[-1,0,1])
+                try:
+                    cbar = fig.colorbar(cax) #, ticks=[-1,0,1])
+                except UnboundLocalError:
+                    print("\n\n\tColorbar can not be added internally when axis is passed!\n\n\n")
+                    raise UnboundLocalError
+
             if kwds.has_key('colorbar_label'):
                 cbar.set_label(kwds['colorbar_label'])
     #    cbar.ax.set_yticklabels(['< -1','0','> 1'])    
@@ -3298,6 +3293,7 @@ def create_empty_model(**kwds):
     .. note:: the following keywords address functionalities to read the model geometry from a GeoModeller model
         
     **Additional Keywords for geometry functionalities**:    
+        - *boussinesq* = True/ False : set couplings to reflect boussinesq assumption
         - *update_from_geomodel* = True/False
         - *geomodeller_dir* = directory_path
         - *geomodel_filename* = geomodel_filename
@@ -4535,6 +4531,10 @@ NFLO
     if kwds.has_key('equilibrium_layer') and kwds['equilibrium_layer'] > 0:
         # add thermal equilibrium layers at bottom of model
         S1.assing_thermal_equil_layers(kwds['equilibrium_layer'])
+        
+    # Boussinesq assumptions, only density variable for comparison with analytical solutions
+    if kwds.has_key("boussinesq") and kwds['boussinesq']:
+        S1.set("KOPPX_FLAG", "0 1 1 1 1")
     
     if kwds.has_key('nml_filename'):
         filename = kwds['nml_filename']
