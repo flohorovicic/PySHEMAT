@@ -1034,7 +1034,7 @@ class Shemat_file:
             - *var_name* = string : Name of SHEMAT variable
         """
         # read array from SHEMAT file
-        ori_array = np.arary(self.get_array(var_name))
+        ori_array = np.array(self.get_array(var_name))
         # read array length from SHEMAT file
         idim = int(self.get("IDIM"))
         jdim = int(self.get("JDIM"))
