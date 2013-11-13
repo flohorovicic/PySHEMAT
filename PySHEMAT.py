@@ -4369,6 +4369,9 @@ NFLO
         n_layer = nx*ny
         temp[-n_layer:] = ones(n_layer) * float(kwds['top_temperature'])
         S1.set_array("# TEMP", temp)
+    elif kwds.has_key('topt') and kwds['topt'] == "WSD":
+        # adjust boundary conditions
+        S1.diri_temp[-n_layer:] = np.zeros(n_layer)
         
     if kwds.has_key('baset') and kwds['baset'] == "TEMP" and kwds.has_key('base_temperature'):
         # set temperature at base of model
@@ -4377,6 +4380,11 @@ NFLO
         n_layer = nx*ny
         temp[:n_layer] = ones(n_layer) * float(kwds['base_temperature'])
         S1.set_array("# TEMP", temp)
+    elif kwds.has_key('baset') and kwds['baset'] == "WSD":
+        # adjust boundary conditions
+        S1.diri_temp[:n_layer] = np.zeros(n_layer)
+        
+
     
     # adjust base and top temperatures for defined dirichlet BC with new methods
     if kwds.has_key('bc_temperature_top') and kwds['bc_temperature_top'] == "dirichlet":
@@ -4393,6 +4401,9 @@ NFLO
         S1.set_array("# TEMP", temp)
         # update bcs
         S1.diri_temp[-n_layer:] = ones(n_layer)
+    elif kwds.has_key('bc_temperature_top') and kwds['bc_temperature_top'] == "neumann":
+        # adjust boundary conditions
+        S1.diri_temp[-n_layer:] = np.zeros(n_layer)
         
     if kwds.has_key('bc_temperature_base') and kwds['bc_temperature_base'] == "dirichlet":
         # set temperature at base of model
@@ -4409,6 +4420,13 @@ NFLO
 
         S1.set_array("# TEMP", temp)
         S1.diri_temp[:n_layer] = ones(n_layer)
+    elif kwds.has_key('bc_temperature_base') and kwds['bc_temperature_base'] == "neumann":
+        # adjust boundary conditions
+        S1.diri_temp[:n_layer] = np.zeros(n_layer)
+        
+        
+        
+        
         
     # update boundary conditions, otherwise not set correctly (as negative POR, PERM, ..)
     S1.update_bcs()
