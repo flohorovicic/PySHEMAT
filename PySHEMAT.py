@@ -2137,6 +2137,8 @@ class Shemat_file:
             - *vmax* = float
             - *vertical_ex* = float : vertical exegeration, if set to 1: real aspect ratios
             - *xkcd* = True/False : create XKCD-style geeky plots - more for fun than publications
+            - *ax* = matplotlib axis object : draw on this object
+            - *fig* = matplotlib figure object : to add colorbar, etc. when axis is passed
         """ 
         # reshape data
         idim = int(self.get("IDIM"))
@@ -2172,7 +2174,8 @@ class Shemat_file:
         #
         #
         # property_xy = rot90(property_xy)
-        import matplotlib.pyplot as plt
+        if not kwds.has_key("ax"):
+            import matplotlib.pyplot as plt
 #        from pylab import figure, text, show, savefig
 #        from matplotlib import cm
         # set properties
@@ -2186,15 +2189,20 @@ class Shemat_file:
         else: vmax = None
         # set figure size and plot
         if kwds.has_key('two_plots') and kwds['two_plots'] == True:
-            fig = plt.figure(figsize=(10,5))
-            ax = fig.add_subplot(1,2,1)
-            fig.subplots_adjust(wspace=0.3)        
+            if not kwds.has_key('ax'):
+                fig = plt.figure(figsize=(10,5))
+                ax = fig.add_subplot(1,2,1)
+                fig.subplots_adjust(wspace=0.3)
         else:
-            fig = plt.figure()
+            if not kwds.has_key('ax'):
+                fig = plt.figure()
 #            if kwds.has_key('vertical_ex'):
 #                ax = fig.add_axes([0.2,0.2,0.6,0.6])
 #            else:
-            ax = fig.add_subplot(1,1,1)
+                ax = fig.add_subplot(1,1,1)
+            else:
+                ax = kwds['ax']
+                fig = kwds['fig']
             if kwds.has_key('xlabel'):
                 ax.set_xlabel(kwds['xlabel'])
             elif kwds.has_key('xscale'):
