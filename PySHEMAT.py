@@ -3282,6 +3282,7 @@ def create_empty_model(**kwds):
         - *set_head* = int : set all head values to given number; not working if initialize_heads = True!!
         - *lambda0* = float : thermal conductivity (for the whole model)
         - *vtk* = True/ False : toggle output to VTK file (default: True)
+        - *boussinesq* = True/ False: set boussinesq conditions (only density change with T)
         - *thermal_cond_function_of_temp* = True/ False : calculate thermal conductivity as a function of temperature,
         see SHEMAT book pg. 14 for details
 
@@ -4333,7 +4334,20 @@ NFLO
                         depth = total_depth - sum(kwds['dz'][0:z])
                         temp_xyz[x][y][z] = t0 + depth * t_grad
             S1.set_array_from_xyz_structure("# TEMP", temp_xyz)
-        else: print "need basal heat flux (kwds: basal_heat_flux) to calculate initial gradient!"
+        elif kwds.has_key("value_temperature_top") and kwds.has_key("value_temperature_base"):
+            # initialise with forced fix temperature gradient
+            temp_xyz = S1.get_array_as_xyz_structure("# TEMP")
+            total_depth = sum(kwds['dz'])
+            t_grad = (kwds["value_temperature_base"] - kwds["value_temperature_top"]) / total_depth
+            t0 = kwds["value_temperature_base"]
+            temp_xyz = S1.get_array_as_xyz_structure("# TEMP")
+            for x in range(nx):
+                for y in range(ny):
+                    for z in range(nz):
+                        depth = sum(kwds['dz'][0:z])
+                        temp_xyz[x][y][z] = t0 - depth * t_grad
+            S1.set_array_from_xyz_structure("# TEMP", temp_xyz)
+        else: print("Temperature gradient can not be initialised with applied settings!")
     if kwds.has_key('initialize_heads') and kwds['initialize_heads']:
         print "Intitialize hydraulic heads"
         # set head values all to project depth (matter of stability?)
@@ -4558,6 +4572,9 @@ NFLO
         koplng = S1.get("KOPLNG")
         koplng = koplng[:3]+'P'
         S1.set("KOPLNG",koplng)
+    
+    if kwds.has_key("boussinesq") and kwds['boussinesq']:
+        S1.set("KOPPX_FLAG", "0 1 1 1 1 ")
     
     if kwds.has_key('equilibrium_layer') and kwds['equilibrium_layer'] > 0:
         # add thermal equilibrium layers at bottom of model
