@@ -3239,6 +3239,23 @@ echo "Total simulation time [s]: $DIFF" >> time.txt
     f.write(text1 + text2 + text3 + text4 + text5)
     f.close()
 
+
+def create_model_from_geogrid(G1, **kwds):
+    """Create a SHEMAT model based on pygeomod.geogrid.GeoGrid object
+    
+    The geogrid object is, for example, derived from an exported Geomodeller grid.
+    
+    **Arguments**:
+        - *G1* = geogrid.Geogrid : grid object (containing data and dimension information)
+        
+    **Optional Keywords**:
+        - *property_dict* = dictinary : containing property information to initialise SHEMAT properties
+        **In addition, all keywords used in create_empty_model() can be used (as this function is called)**
+    """
+    
+    
+    
+
 def create_empty_model(**kwds):
     """create a new SHEMAT model based on grid and boundary definition
     
@@ -3307,7 +3324,8 @@ def create_empty_model(**kwds):
     .. note:: the following keywords address functionalities to read the model geometry from a GeoModeller model
         
     **Additional Keywords for geometry functionalities**:    
-        - *update_from_geomodel* = True/False
+        - *update_from_geomodel* = bool : update model geology from geomodel
+        - *update_from_geogrid* = geogrid.GeoGrid : update model from exported geogrid
         - *geomodeller_dir* = directory_path
         - *geomodel_filename* = geomodel_filename
         - *update_from_property_file* = True/ False: update model variables from property file
@@ -4334,9 +4352,9 @@ NFLO
                         depth = total_depth - sum(kwds['dz'][0:z])
                         temp_xyz[x][y][z] = t0 + depth * t_grad
             S1.set_array_from_xyz_structure("# TEMP", temp_xyz)
-<<<<<<< .merge_file_ruLe2v
-        else: print "need basal heat flux (kwds: basal_heat_flux) to calculate initial gradient!"
-=======
+#<<<<<<< .merge_file_ruLe2v
+#        else: print "need basal heat flux (kwds: basal_heat_flux) to calculate initial gradient!"
+#=======
         elif kwds.has_key("value_temperature_top") and kwds.has_key("value_temperature_base"):
             # initialise with forced fix temperature gradient
             temp_xyz = S1.get_array_as_xyz_structure("# TEMP")
@@ -4351,7 +4369,7 @@ NFLO
                         temp_xyz[x][y][z] = t0 - depth * t_grad
             S1.set_array_from_xyz_structure("# TEMP", temp_xyz)
         else: print("Temperature gradient can not be initialised with applied settings!")
->>>>>>> .merge_file_Vm6q4a
+#>>>>>>> .merge_file_Vm6q4a
     if kwds.has_key('initialize_heads') and kwds['initialize_heads']:
         print "Intitialize hydraulic heads"
         # set head values all to project depth (matter of stability?)
