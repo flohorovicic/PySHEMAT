@@ -1,0 +1,1 @@
+Search.setIndex({envversion:42,terms:{},objtypes:{},objnames:{},filenames:["PySHEMAT_doc","modules"],titles:["PySHEMAT package","PySHEMAT"],objects:{},titleterms:{pyascii:0,modul:0,submodul:0,content:0,packag:0,pyshemat:[0,1]}})
