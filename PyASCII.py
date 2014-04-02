@@ -570,9 +570,9 @@ class ASCII_File:
         **Returns:
             *(x_coords, y_coords, z_values)
         """
-        # detrmine x and y corrds, can be done with predefined functions
-        xcoords = self.xcoords(self.header)
-        ycoords = self.ycoords(self.header)
+        # determine x and y corrds, can be done with predefined functions
+        xcoords = [float(x) for x in self.xcoords(self.header)]
+        ycoords = [float(y) for y in self.ycoords(self.header)]
         # get z-values
         self.get_z_values()
         return (xcoords, ycoords, self.z_values)
