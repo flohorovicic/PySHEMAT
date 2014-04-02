@@ -3240,18 +3240,6 @@ echo "Total simulation time [s]: $DIFF" >> time.txt
     f.close()
 
 
-def create_model_from_geogrid(G1, **kwds):
-    """Create a SHEMAT model based on pygeomod.geogrid.GeoGrid object
-    
-    The geogrid object is, for example, derived from an exported Geomodeller grid.
-    
-    **Arguments**:
-        - *G1* = geogrid.Geogrid : grid object (containing data and dimension information)
-        
-    **Optional Keywords**:
-        - *property_dict* = dictinary : containing property information to initialise SHEMAT properties
-        **In addition, all keywords used in create_empty_model() can be used (as this function is called)**
-    """
     
     
     
@@ -3288,6 +3276,7 @@ def create_empty_model(**kwds):
     
     **Additional Keywords**:
         - *nml_filename* = string : filename for nml file (extension .nml added as default)
+        - *verbose* = bool : Show output of model on screen (default now: False)
         - *top_heat_flux* = int : one value for heat flux assigned to all cells
         - *basal_heat_flux* = int : one value for heat flux, assigned to all cells
         - *compute_heat* = True/False : set flags to compute heat transport (default = True)
@@ -3325,7 +3314,7 @@ def create_empty_model(**kwds):
         
     **Additional Keywords for geometry functionalities**:    
         - *update_from_geomodel* = bool : update model geology from geomodel
-        - *update_from_geogrid* = geogrid.GeoGrid : update model from exported geogrid
+        - *from_geogrid* = geogrid.GeoGrid : update model from exported geogrid
         - *geomodeller_dir* = directory_path
         - *geomodel_filename* = geomodel_filename
         - *update_from_property_file* = True/ False: update model variables from property file
@@ -3341,15 +3330,23 @@ def create_empty_model(**kwds):
         - *image_array* = numpy.ndarray : 2-D array of image
         for example exported from GoCAD voxet object (with GoCAD scripting methods).
     """
-    print kwds['dx']
-    print kwds['dy']
-    print kwds['dz']
-    nx = len(kwds['dx'])
-    ny = len(kwds['dy'])
-    nz = len(kwds['dz'])
+    verbose = kwds.get("verbose", False)
+    # 03/2014: added functionality to create model directly from geogrid 
+    if kwds.has_key("from_geogrid"):
+        G = kwds['from_geogrid']
+        dx = G.delx
+        dy = G.dely
+        dz = G.delz
+    else:
+        dx = kwds['dx']
+        dy = kwds['dy']
+        dz = kwds['dz']
+    nx = len(dx)
+    ny = len(dy)
+    nz = len(dz)
     # caluclate layer grid size
-    layer_grid_number = len(kwds['dx']) * len(kwds['dy'])
-    model_grid_number = len(kwds['dx']) * len(kwds['dy'])* len(kwds['dz'])
+    layer_grid_number = nx * ny
+    model_grid_number = nx * ny * nz
     S1 = Shemat_file()
     # define basic project lines
     S1.filelines = []
@@ -4097,7 +4094,8 @@ NFLO
         lines = lines_trans_2
         
     for l in lines.split("\n"):
-        print l
+        if verbose:
+            print l
         S1.filelines.append(l+"\n")
     # get original dimensions for rescaling below
     ori_nx = int(S1.get("IDIM"))
@@ -4113,16 +4111,16 @@ NFLO
     else:
         S1.set("TITLE", "Horizontal - Model created with PySHEMAT")
     # set nodes and delimiters
-    print "\n\n\tCheck implementation of I0,J0,K0!\n\n\n"
-    S1.set("I0",len(kwds['dx']))
-    S1.set("J0",len(kwds['dy']))
-    S1.set("K0",len(kwds['dz']))
-    S1.set("IDIM", len(kwds['dx']))
-    S1.set("JDIM", len(kwds['dy']))
-    S1.set("KDIM", len(kwds['dz']))
-    S1.set_array("DELX", kwds['dx'])
-    S1.set_array("DELY", kwds['dy'])
-    S1.set_array("DELZ", kwds['dz'])
+    # print "\n\n\tCheck implementation of I0,J0,K0!\n\n\n"
+    S1.set("I0",nx)
+    S1.set("J0",ny)
+    S1.set("K0",nz)
+    S1.set("IDIM", nx)
+    S1.set("JDIM", ny)
+    S1.set("KDIM", nz)
+    S1.set_array("DELX", dx)
+    S1.set_array("DELY", dy)
+    S1.set_array("DELZ", dz)
     # set problem key, if defined in kwds
     if kwds.has_key('key'): S1.set("KEY", kwds['key'])
     if kwds.has_key('stat'): S1.set("STAT", kwds['stat'])
@@ -4275,9 +4273,12 @@ NFLO
 
     
     # rescale recharge rate variables QRE, QRELR, QREVH
-    S1.change_array_length("# QRE", len(kwds['dx']) * len(kwds['dy']) * 2)
-    S1.change_array_length("# QRELR", len(kwds['dy']) * len(kwds['dz']) * 2)
-    S1.change_array_length("# QREVH", len(kwds['dz']) * len(kwds['dx']) * 2)
+#    S1.change_array_length("# QRE", len(kwds['dx']) * len(kwds['dy']) * 2)
+#    S1.change_array_length("# QRELR", len(kwds['dy']) * len(kwds['dz']) * 2)
+#    S1.change_array_length("# QREVH", len(kwds['dz']) * len(kwds['dx']) * 2)
+    S1.change_array_length("# QRE", nx * ny * 2)
+    S1.change_array_length("# QRELR", ny * nz * 2)
+    S1.change_array_length("# QREVH", nz * nx * 2)
     
     # change boundary condition arrays (self.diri_temp, self.diri_head and self.diri_conc)
     # !!! CAUTION !!! checks and adjusts for constant BC at top and bottom only!
@@ -4328,10 +4329,12 @@ NFLO
                     "AREAKT"                  
                     ]
     for var_name in layer_vars:
-        print var_name
+        if verbose:
+            print var_name
         S1.change_array_length(var_name, layer_grid_number)
     for var_name in model_vars:
-        print var_name
+        if verbose:
+            print var_name
         S1.change_array_length(var_name, model_grid_number)
     #
     # now: initialize temperature gradient and/ or hydraulic heads
@@ -4556,6 +4559,10 @@ NFLO
             for l1 in l[:-1]:
                 geol.append(int(l1))
         S1.set_array("GEOLOGY", geol)
+    
+    if kwds.has_key("from_geogrid"):
+        # Update model from geogrid object
+        S1.set_array_from_xyz_structure("GEOLOGY", G.grid)
         
     if kwds.has_key('vertical_model_from_png_image') and kwds['vertical_model_from_png_image']:
         print("Create a model with vertical geology defined from png figure")
