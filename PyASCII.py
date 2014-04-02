@@ -538,7 +538,11 @@ class ASCII_File:
         return(y)
 
     def process_z_values_to_array(self):
-        """ Read data in list and write to array, flo 03/2008 """
+        """ Read data in list and write to array 
+        
+        ..Note: This function returns a list of the data lines, i.e. one list entry
+        per y-value (2-D), and not a 1-D list of the data itself.
+        """
         # if talk: print "\tread data file line by line"
         self.data_array = []
         # L_col = []
@@ -554,6 +558,25 @@ class ASCII_File:
 
             self.data_array.append(L_col)
         return self.data_array
+    
+    def export_to_meshgrid(self):
+        """Export ASCII grid into a format than can be used with meshgrid in Matlab/ Pylab
+        
+        This method can be used to export the mesh structure and the data to create
+        a plot with the meshgrid functions, used in Matlab and Pylab. The method exports
+        the x- and y-coordinates of the grid in a 1-D array and the z-data in a x-dominant
+        1-D array.
+        
+        **Returns:
+            *(x_coords, y_coords, z_values)
+        """
+        # detrmine x and y corrds, can be done with predefined functions
+        xcoords = self.xcoords(self.header)
+        ycoords = self.ycoords(self.header)
+        # get z-values
+        self.get_z_values()
+        return (xcoords, ycoords, self.z_values)
+    
     
     def check_data_array(self):
         """ Check if data_array already exists, if not -> create """
@@ -675,6 +698,25 @@ class ASCII_File:
                 if val != self.header['NODATA_value']:
                     self.hist_data.append(val)
 
+    def get_z_values(self, **kwds):
+        """Get z-values from grid and write to 1-D x-dominant data array
+        
+        **Optional Keywords**:
+            - *nodata_value* = float : set nodata entries to specific value
+        """
+        try:
+            self.data_array
+        except AttributeError:
+            print "Create z-Value Data array"
+            self.process_z_values_to_array()
+        self.z_values = []
+        for row in self.data_array:
+            for val in row:
+                if val == self.header['NODATA_value'] and kwds.has_key('nodata_value'):
+                    self.z_values.append(kwds['nodata_value'])
+                else:
+                    self.z_values.append(val)
+
     def plot_ASCII_grid_histogram(self,n=100):
         """Plot histogram created with self.calculate_histogram()
         n: number of bins"""
@@ -696,9 +738,28 @@ class ASCII_File:
           
     def plot_ASCII_grid_2D(self, **kwds):
         """Create 2D plot of ASCII grid
-        optional keywords:
-        filename = string : filename (and, implicitly, the format) of plot file
+        
+        **Optional keywords**:
+            - *filename* = string : filename (and, implicitly, the format) of plot file
+            - *cmap* = maptlotlib colormap: colormap for plot (default: gray)
+            - *figsize* = (float, float) : figure size in x,y (default: 8,6)
+            - *colorbar* = bool : plot colorbar (default: True)
+            - *title* = string : plot title (default: filename)
+            - *vmin* = float : minimum valule to plot (default: min of data)
+            - *vmax* = float : maximum value to plot (default: max of data)
+            - *ax* = matplotlib.axis : axis object to append plot (axis is returned!)
         """
+        # check all keywords and assign default values
+        cmap = kwds.get("cmap", 'gray')
+        figsize = kwds.get("figsize", (8,6))
+        colorbar = kwds.get("colorbar", True)
+        title = kwds.get("title", self.file_name_str)
+        
+        self.check_hist()
+        vmin = kwds.get("vmin", min(self.hist_data))
+        vmax = kwds.get("vmax", max(self.hist_data))
+        
+        
         # read self.x_data and self.y_data if they do not already exist...
         # to save computation time??
         try:
@@ -716,30 +777,39 @@ class ASCII_File:
         # Import matplotlib modules, test, if matplotlib installed
         # export test to separate function?
         try:
-            from pylab import imshow, gray, colorbar, title, savefig
+            import matplotlib.pyplot as plt
         except ImportError:
             print "Sorry, Module matplotlib is not installed."
             print "Histogram can not be plotted."
             print "Install Matplotlib and try again ;-) "
             return
         
+        # if axes is not passed as keyword, create stand alone figure
+        if kwds.has_key('ax'):
+            ax = kwds['ax']
+        else:
+            fig = plt.figure(figsize = figsize)
+            ax = fig.add_subplot(111)
+        
         # [X,Y] = meshgrid(self.xcoords, self.ycoords)
         #
         # self.check_data_array()
-        self.check_hist()
-        im = imshow(self.data_array, vmin=min(self.hist_data), vmax=max(self.hist_data))
-        # im = imshow(self.data_array)
         
-        gray()
-        colorbar()
+        im = ax.imshow(self.data_array, vmin=vmin, vmax=vmax,
+                       cmap=cmap)
+        # im = imshow(self.data_array)
+        if colorbar:
+            plt.colorbar(im) 
         # plot contour lines on top? -> TEST!!
 
         # axis('off')
-        title(self.file_name_str)
+        ax.set_title(title)
         if kwds.has_key('filename'):
-            savefig(kwds['filename'])
+            plt.savefig(kwds['filename'])
         else:
-            savefig('ascii_grid.png')
+            plt.savefig('ascii_grid.png')
+        if kwds.has_key("ax"):
+            return ax
         
     def get_gmt_range(self):
         """Determine the (x,y) range of the grid in the format used by GMT
