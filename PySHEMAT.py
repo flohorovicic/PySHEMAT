@@ -18,7 +18,7 @@ J. Florian Wellmann, Adrian Croucher, Klaus Regenauer-Lieb, Python scripting lib
 Available online 21 October 2011, ISSN 0098-3004, 10.1016/j.cageo.2011.10.011.
 
 """
-
+import os, sys
 import re # for regular expression fit, neccessary for stupid nlo files
 # from matplotlib import use
 # use("Agg")
@@ -1503,6 +1503,41 @@ class Shemat_file:
         # print scalar_vtk
         if kwds.has_key('show') and kwds['show']:
             view(sgrid)
+            
+    def export_array_to_vtk(self, array, **kwds):
+        """Export a (3D SHEMAT) array to a vtk file for visualisation
+        
+        **Arguments**:
+            - *array* = 3-D array : array properties (e.g. obtained
+                                    with self.get_array_as_xyz_structure("TEMP")
+        
+        **Optional keywords**:
+            - *property_name* = string : name of property
+            - *vtk_filename* = string : filename of vtk file (default: property name)
+            - *directory* = file path : directory to store file (default: cwd)
+        """
+        property_name = kwds.get("property_name", "SHEMAT_property")
+        vtk_filename = kwds.get("vtk_filename", property_name)
+        directory = kwds.get("directory", os.getcwd())
+        try:
+            from evtk.hl import gridToVTK
+        except ImportError:
+            print("\n\n\n\tNOTE: requires pyevtk to be installed!\n")
+            print("\tDownload from https://bitbucket.org/pauloh/pyevtk and try again!\n\n\n")
+            raise ImportError("Package pyvtk not installed!")
+
+        # get grid into correct coordinates
+        # grid = np.reshape(np.array(array), (self.idim, self.idim, self.jdim))
+        # convert to numpy array
+        grid = np.array(array)
+
+        # get cell centers as coordinates
+        self.get_cell_boundaries()
+        
+        gridToVTK(vtk_filename, np.array(self.boundaries_x), 
+                  np.array(self.boundaries_y), 
+                  np.array(self.boundaries_z),
+                  cellData = {property_name: grid})
     
     def get_origin(self):
         """only alias for self.get_model_origin() for consistency"""
