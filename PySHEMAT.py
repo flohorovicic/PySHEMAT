@@ -2115,8 +2115,11 @@ class Shemat_file:
         
         isohypse_xy = []
         
-        for y in range(self.jdim):
-            for x in range(self.idim):
+        jdim = int(self.get("JDIM"))
+        idim = int(self.get("IDIM"))
+        
+        for y in range(jdim):
+            for x in range(idim):
                 for i,prop in enumerate(property_xyz[x][y]):
                     if prop < value:
                         # value between two centres, linear interpolation to approximate
@@ -4598,6 +4601,7 @@ NFLO
     if kwds.has_key("from_geogrid"):
         # Update model from geogrid object
         S1.set_array_from_xyz_structure("GEOLOGY", G.grid)
+        S1.set_origin(G.xmin, G.ymin, G.zmin)
         
     if kwds.has_key('vertical_model_from_png_image') and kwds['vertical_model_from_png_image']:
         print("Create a model with vertical geology defined from png figure")
