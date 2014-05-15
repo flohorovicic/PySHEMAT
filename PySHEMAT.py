@@ -4458,6 +4458,8 @@ NFLO
         n_layer = nx*ny
         temp[:n_layer] = ones(n_layer) * float(kwds['base_temperature'])
         S1.set_array("# TEMP", temp)
+        # adjust boundary conditions
+        S1.diri_temp[:n_layer] = np.ones(n_layer)
     elif kwds.has_key('baset') and kwds['baset'] == "WSD":
         # adjust boundary conditions
         S1.diri_temp[:n_layer] = np.zeros(n_layer)
@@ -4629,10 +4631,9 @@ NFLO
     if kwds.has_key('baset') and kwds['baset']=='TEMP':
         por = S1.get_array("POR")
         n_layer = nx*ny
-        for i in range(n_layer):
-            if por[i] > 0:
-                por[i] = - por[i]
-        S1.set_array("POR", por)
+        # adjust boundary conditions
+        S1.diri_temp[:n_layer] = np.ones(n_layer)
+        S1.update_bcs()
 
     if kwds.has_key('thermal_cond_function_of_temp') and kwds['thermal_cond_function_of_temp']:
         # set flag to calculate thermal conductivity as a function of temperature,
