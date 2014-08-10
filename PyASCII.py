@@ -811,6 +811,111 @@ class ASCII_File:
         if kwds.has_key("ax"):
             return ax
         
+    def plot_grid_and_hist(self, **kwds):
+        """Create a 2-D plot of the grid in space and a histogram of values
+        
+        The histogram contains median and percentiles
+        
+        **Optional Keywords**:
+            - *filename* = string : filename (and, implicitly, the format) of plot file
+            - *cmap* = maptlotlib colormap: colormap for plot (default: gray)
+            - *figsize* = (float, float) : figure size in x,y (default: 8,6)
+            - *colorbar* = bool : plot colorbar (default: True)
+            - *title* = string : plot title (default: filename)
+            - *vmin* = float : minimum valule to plot (default: min of data)
+            - *vmax* = float : maximum value to plot (default: max of data)
+            - *n* = int : number of bins for histogram (default: 100)
+         """
+        cmap = kwds.get("cmap", "gray")
+        figsize = kwds.get("figsize", (8,6))
+        colorbar = kwds.get("colorbar", True)
+        title = kwds.get("title", self.file_name_str)
+        n = kwds.get("n", 100)
+        
+        self.check_hist()
+        vmin = kwds.get("vmin", min(self.hist_data))
+        vmax = kwds.get("vmax", max(self.hist_data))
+        
+        
+        # read self.x_data and self.y_data if they do not already exist...
+        # to save computation time??
+        try:
+            (self.x_data, self.y_data)
+        except AttributeError:
+            print "Create x- and y- coordinates"
+            self.x_data = self.xcoords(self.header)
+            self.y_data = self.ycoords(self.header)
+        # check, if data_array with z values is already created
+        try:
+            self.data_array
+        except AttributeError:
+            print "Create z-Value Data array"
+            self.process_z_values_to_array
+        # Import matplotlib modules, test, if matplotlib installed
+        # export test to separate function?
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            print "Sorry, Module matplotlib is not installed."
+            print "Histogram can not be plotted."
+            print "Install Matplotlib and try again ;-) "
+            return
+        
+        fig = plt.figure(figsize = figsize)
+#        ax1 = fig.add_subplot(121)
+        ax1 = fig.add_axes([0.02, 0.05, 0.35, 0.9])
+        
+        # [X,Y] = meshgrid(self.xcoords, self.ycoords)
+        #
+        # self.check_data_array()
+        
+        im = ax1.imshow(self.data_array, vmin=vmin, vmax=vmax,
+                       cmap=cmap)
+        # im = imshow(self.data_array)
+        if colorbar:
+            plt.colorbar(im, aspect=50) 
+        # plot contour lines on top? -> TEST!!
+
+        # axis('off')
+        ax1.set_title(title)
+        
+        #=======================================================================
+        # Plot Histogram 
+        #=======================================================================
+        
+#        ax2 = fig.add_subplot(122)
+        ax2 = fig.add_axes([0.4, 0.05, 0.48, 0.9])
+        
+                
+        import numpy as np
+        # extract values > 0
+        d1 = np.array(self.hist_data)
+        d2 = d1[d1>0]
+        # compute statistics
+        med = np.median(d2)
+        p5 = np.percentile(d2,5)
+        p25 = np.percentile(d2,25)
+        p75 = np.percentile(d2,75)
+        p95 = np.percentile(d2,95)
+        
+        ax2.hist(d2, bins=n, lw = 0, color='DarkGray')
+        ax2.axvline(med, c='k', lw=2)
+        ax2.axvline(p25, c='k', lw=1)
+        ax2.axvline(p75, c='k', lw=1)
+        ax2.set_xlabel("Thickness")
+        ax2.set_ylabel("Counts")
+        ax2.set_xlim([0,vmax])
+        
+#        ax2.hist(self.hist_data,n)
+        
+        
+        if kwds.has_key('filename'):
+            plt.savefig(kwds['filename'])
+        else:
+            plt.savefig('ascii_grid.png')
+
+        
+        
     def get_gmt_range(self):
         """Determine the (x,y) range of the grid in the format used by GMT
         
