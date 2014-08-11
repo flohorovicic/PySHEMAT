@@ -748,17 +748,39 @@ class ASCII_File:
             - *vmin* = float : minimum valule to plot (default: min of data)
             - *vmax* = float : maximum value to plot (default: max of data)
             - *ax* = matplotlib.axis : axis object to append plot (axis is returned!)
+            - *interpolation* = 'spline36', 'nearest', etc. : matplotlib interpolation types
+                    (default: spline36)
+            - *fraction* = float [0-1] : fraction of width for colorbar (default: 0.15)
+            - *colorbar_title* = string: title of colorbar
+            - *rotate_labels* = bool : rotate y-axis labels (default: False)
+            - *max_labels_x* = int : maximum number of labels on x-axis
+            - *max_labels_y* = int : maximum number of labels on y-axis
+            - *adjust_coords* = bool : adjust axes coordinates to grid (default: cell number)
+            - 
         """
         # check all keywords and assign default values
         cmap = kwds.get("cmap", 'gray')
         figsize = kwds.get("figsize", (8,6))
         colorbar = kwds.get("colorbar", True)
         title = kwds.get("title", self.file_name_str)
+        interpolation = kwds.get("interpolation", "spline36")
+        fraction = kwds.get("fraction", 0.15)
+        colorbar_title = kwds.get("colorbar_title", "")
+        rotate_labels = kwds.get("rotate_labels", False)
         
         self.check_hist()
         vmin = kwds.get("vmin", min(self.hist_data))
         vmax = kwds.get("vmax", max(self.hist_data))
         
+        # hack to adjust labels
+        from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+        from matplotlib import rcParams
+        
+        majorLocator   = MultipleLocator(50)
+        majorFormatter = FormatStrFormatter('%d')
+        minorLocator   = MultipleLocator(25)
+        rcParams.update({'font.size': 15})
+
         
         # read self.x_data and self.y_data if they do not already exist...
         # to save computation time??
@@ -796,10 +818,41 @@ class ASCII_File:
         # self.check_data_array()
         
         im = ax.imshow(self.data_array, vmin=vmin, vmax=vmax,
-                       cmap=cmap)
-        # im = imshow(self.data_array)
+                       cmap=cmap, interpolation=interpolation)
+        
+        if kwds.has_key("adjust_coords") and kwds['adjust_coords']:
+            # setting to real coordinates
+            im.set_extent([self.header['xllcorner'],
+                    self.header['xllcorner'] + self.header['ncol'] * self.header['cellsize'],
+                    self.header['yllcorner'],
+                    self.header['yllcorner'] + self.header['nrow'] * self.header['cellsize']])
+        
+        from matplotlib.ticker import MaxNLocator
+        if kwds.has_key("max_labels_x"):
+            im.axes.xaxis.set_major_locator(MaxNLocator(kwds['max_labels_x']))
+       
+        if kwds.has_key("max_labels_y"):
+            im.axes.yaxis.set_major_locator(MaxNLocator(kwds['max_labels_y']))
+        
+        
+        # rotate labels on y-acis:
+        if rotate_labels:
+            for label in im.axes.yaxis.get_ticklabels():
+                label.set_rotation(-90)
+        
+#        def mjrFormatter(x, pos):
+##            x = x - self.header['yllcorner']
+#            return "{0}".format(x)
+#            # return "$2^{{{0}}}$".format(x)
+#        
+#        import matplotlib as mpl
+#        im.axes.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(mjrFormatter))
+#        
+            # im = imshow(self.data_array)
         if colorbar:
-            plt.colorbar(im) 
+            cbar = plt.colorbar(im, fraction=fraction) # , location="bottom")
+            cbar.set_label(colorbar_title)
+                         
         # plot contour lines on top? -> TEST!!
 
         # axis('off')
