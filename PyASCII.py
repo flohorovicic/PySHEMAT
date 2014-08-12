@@ -40,6 +40,7 @@ PyASCII provides methods to handle of ASCII-Gridfiles:
 
 from sys import exit
 import string
+import numpy as np
 
 class ASCII_File:
     def __init__(self, *args):
@@ -717,9 +718,23 @@ class ASCII_File:
                 else:
                     self.z_values.append(val)
 
-    def plot_ASCII_grid_histogram(self,n=100):
+    def plot_ASCII_grid_histogram(self, n=100, **kwds):
         """Plot histogram created with self.calculate_histogram()
-        n: number of bins"""
+        
+        **Arguments**:
+            - *n* = int : number of bins (default=100)
+        
+        **Optional Keywords**:
+            - *smooth* = bool : create a smoothed version (default: False)
+            - *add_stats* = bool : add percentile lines in plot (default: False)
+              .. note:: Statistics are calculated for original (not scaled) dataset!
+            - *return_stats* = bool : return statistics as dictionary
+            - *exclude_zero* = bool : exclude zero values (default: False)
+            - *figsize* = (x,y) : matplotlib figsize
+            - *savefig* = bool : save figure to file (default: False)
+            - *fig_filename* = string : filename (default: "Histogram fname")
+            - *vmax* = float : limit to maximum value
+        """
         # test, if self.hist_data exists, if not -> create
         try:
             self.hist_data
@@ -727,14 +742,81 @@ class ASCII_File:
             self.calculate_histogram()
         # Import matplotlib modules, test, if matplotlib installed
         try:
-            from pylab import hist,show
+            import matplotlib.pyplot as plt
         except ImportError:
             print "Sorry, Module matplotlib is not installed."
             print "Histogram can not be plotted."
             print "Install Matplotlib and try again ;-) "
             return
-        hist(self.hist_data,n)
-        show()
+        
+        # set flags 
+        exclude_zero = kwds.get("exclude_zero", False)
+        smooth = kwds.get("smooth", False)
+        add_stats = kwds.get("add_stats", False)
+        savefig = kwds.get("savefig", False)
+        figsize = kwds.get("figsize", (6,4))
+        fig_filename = kwds.get("fig_filename", "histogram_%s.png" % self.file_name_str)
+        return_stats = kwds.get("return_stats", False)
+         
+        # convert to numpy array
+        
+        h_data = np.array(self.hist_data)
+        
+        if exclude_zero:
+            h_data = h_data[h_data > 0]
+        
+        if kwds.has_key("max_val"):
+            h_data = h_data[h_data < kwds['max_val']]
+        
+        # generate figure
+        fig = plt.figure(figsize=figsize)
+        ax = fig.add_subplot(111)
+        
+        if smooth:
+            # first: get histogram data
+            h1 = np.histogram(h_data, bins = n)
+            x = h1[1][:-1] # note: should use centroids, but too lazy
+            y = h1[0]
+            from scipy.interpolate import interp1d
+            f2 = interp1d(x, y, kind='cubic')
+            x_new = np.linspace(10,1300,len(x)/2)
+            ax.fill_between(x_new,f2(x_new), color='0.1')
+        
+        else: 
+            # plot normal histogram        
+            ax.hist(h_data,n)
+            
+        if add_stats:
+            # calculate statistics and add on plot:
+            # compute statistics
+            if smooth:
+                # define light color
+                col = '1.0'
+            else:
+                col = '0.1'
+            med = np.median(h_data)
+            p5 = np.percentile(self.hist_data,5)
+            p25 = np.percentile(self.hist_data,25)
+            p75 = np.percentile(self.hist_data,75)
+            p95 = np.percentile(self.hist_data,95)
+            ax.axvline(med, c=col, lw=3, ls='--')
+            ax.axvline(p25, c=col, lw=2, ls=':')
+            ax.axvline(p75, c=col, lw=2, ls=':')
+            ax.set_xlabel("Thickness")
+            ax.set_ylabel("Counts")
+
+        
+        if savefig:
+            plt.savefig(fig_filename)
+        else:
+            plt.show()
+            
+        if return_stats:
+            return {'p5' : p5, 
+                    'p25' : p25, 
+                    'median' : med,
+                    'p75' : p75,
+                    'p95' : p95}
           
     def plot_ASCII_grid_2D(self, **kwds):
         """Create 2D plot of ASCII grid
