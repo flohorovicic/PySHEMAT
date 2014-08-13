@@ -320,7 +320,7 @@ class ASCII_File:
             return False
     
     def load_grid(self, file_name):
-        print "load File " + file_name
+        # print "load File " + file_name
         try:
             f_ascii = open(file_name)
         except IOError, (nr, string_err):
@@ -332,7 +332,7 @@ class ASCII_File:
     
     def read_header(self, f_ascii):
         """ returns the 6 line header as a dict"""
-        print "read Header of file " + self.file_name_str
+        # print "read Header of file " + self.file_name_str
         header = {}
         line = f_ascii.readline().split()
         header['ncol'] = int(line[1])
@@ -584,7 +584,7 @@ class ASCII_File:
         try:
             self.data_array
         except AttributeError:
-            print "Create z-Value Data array"
+            # print "Create z-Value Data array"
             self.process_z_values_to_array()
 
     def check_mask(self):
@@ -601,7 +601,7 @@ class ASCII_File:
         try:
             self.hist_data
         except AttributeError:
-            print "Calculate histogram data"
+            # print "Calculate histogram data"
             self.calculate_histogram()
 
     
@@ -666,7 +666,7 @@ class ASCII_File:
         try:
             (self.x_data, self.y_data)
         except AttributeError:
-            print "Create x- and y- coordinates"
+            # print "Create x- and y- coordinates"
             self.x_data = self.xcoords(self.header)
             self.y_data = self.ycoords(self.header)
             
@@ -691,13 +691,15 @@ class ASCII_File:
         try:
             self.data_array
         except AttributeError:
-            print "Create z-Value Data array"
+            # print "Create z-Value Data array"
             self.process_z_values_to_array()
         self.hist_data = []
         for row in self.data_array:
             for val in row:
                 if val != self.header['NODATA_value']:
                     self.hist_data.append(val)
+        # convert to numpy array
+        self.hist_data = np.array(self.hist_data)
 
     def get_z_values(self, **kwds):
         """Get z-values from grid and write to 1-D x-dominant data array
@@ -708,7 +710,7 @@ class ASCII_File:
         try:
             self.data_array
         except AttributeError:
-            print "Create z-Value Data array"
+            # print "Create z-Value Data array"
             self.process_z_values_to_array()
         self.z_values = []
         for row in self.data_array:
@@ -733,7 +735,9 @@ class ASCII_File:
             - *figsize* = (x,y) : matplotlib figsize
             - *savefig* = bool : save figure to file (default: False)
             - *fig_filename* = string : filename (default: "Histogram fname")
+            - *vmin* = float : lower limit
             - *vmax* = float : limit to maximum value
+            - *title* = string : title of plot
         """
         # test, if self.hist_data exists, if not -> create
         try:
@@ -757,16 +761,16 @@ class ASCII_File:
         figsize = kwds.get("figsize", (6,4))
         fig_filename = kwds.get("fig_filename", "histogram_%s.png" % self.file_name_str)
         return_stats = kwds.get("return_stats", False)
+        title = kwds.get("title", "")
          
-        # convert to numpy array
-        
-        h_data = np.array(self.hist_data)
-        
         if exclude_zero:
-            h_data = h_data[h_data > 0]
+            h_data = self.hist_data[self.hist_data > 0]
         
-        if kwds.has_key("max_val"):
-            h_data = h_data[h_data < kwds['max_val']]
+        if kwds.has_key("vmax"):
+            h_data = h_data[h_data < kwds['vmax']]
+        
+        if kwds.has_key("vmin"):
+            h_data = h_data[h_data > kwds['vmin']]
         
         # generate figure
         fig = plt.figure(figsize=figsize)
@@ -779,29 +783,32 @@ class ASCII_File:
             y = h1[0]
             from scipy.interpolate import interp1d
             f2 = interp1d(x, y, kind='cubic')
-            x_new = np.linspace(10,1300,len(x)/2)
+            x_new = np.linspace(1.01*min(h_data),0.99*max(h_data),len(x)/2.)
             ax.fill_between(x_new,f2(x_new), color='0.1')
+            ax.set_xlim((min(h_data), max(h_data)))
+            _, ymax = ax.get_ylim()
+            ax.set_ylim((0,ymax))
+            ax.set_title(title)
         
         else: 
             # plot normal histogram        
-            ax.hist(h_data,n)
+            ax.hist(h_data,n, color = '0.1', lw=0, fc = '0.1')
+            ax.set_xlim((min(h_data), max(h_data)))
+            ax.set_title(title)
             
         if add_stats:
             # calculate statistics and add on plot:
             # compute statistics
-            if smooth:
-                # define light color
-                col = '1.0'
-            else:
-                col = '0.1'
-            med = np.median(h_data)
+            # define light color
+            col = '1.0'
+            med = np.median(self.hist_data)
             p5 = np.percentile(self.hist_data,5)
             p25 = np.percentile(self.hist_data,25)
             p75 = np.percentile(self.hist_data,75)
             p95 = np.percentile(self.hist_data,95)
-            ax.axvline(med, c=col, lw=3, ls='--')
-            ax.axvline(p25, c=col, lw=2, ls=':')
-            ax.axvline(p75, c=col, lw=2, ls=':')
+            ax.axvline(med, c='#CC0000', lw=2)
+            ax.axvline(p25, c=col, lw=2)
+            ax.axvline(p75, c=col, lw=2)
             ax.set_xlabel("Thickness")
             ax.set_ylabel("Counts")
 
@@ -869,14 +876,14 @@ class ASCII_File:
         try:
             (self.x_data, self.y_data)
         except AttributeError:
-            print "Create x- and y- coordinates"
+            # print "Create x- and y- coordinates"
             self.x_data = self.xcoords(self.header)
             self.y_data = self.ycoords(self.header)
         # check, if data_array with z values is already created
         try:
             self.data_array
         except AttributeError:
-            print "Create z-Value Data array"
+            # print "Create z-Value Data array"
             self.process_z_values_to_array
         # Import matplotlib modules, test, if matplotlib installed
         # export test to separate function?
@@ -977,14 +984,14 @@ class ASCII_File:
         try:
             (self.x_data, self.y_data)
         except AttributeError:
-            print "Create x- and y- coordinates"
+            # print "Create x- and y- coordinates"
             self.x_data = self.xcoords(self.header)
             self.y_data = self.ycoords(self.header)
         # check, if data_array with z values is already created
         try:
             self.data_array
         except AttributeError:
-            print "Create z-Value Data array"
+            # print "Create z-Value Data array"
             self.process_z_values_to_array
         # Import matplotlib modules, test, if matplotlib installed
         # export test to separate function?
