@@ -1585,7 +1585,7 @@ class Shemat_file:
         aspect = float, 'auto', 'equal' : define aspect ratio of plot
         contour = True/False: add contour lines
         
-        **For more plotting options: see self.create_section_property_plot documentation!**
+        **For more plotting options: see self.create_2D_property_plot documentation!**
         
         """
         print "create slice plot"
@@ -2177,6 +2177,8 @@ class Shemat_file:
             - *ylabel* = string : label of y-axis
             - *xscale* = 'meter', scale of x-axis (adjust tick labels)
             - *yscale* = 'meter', scale of y-axis (adjust tick labels)
+            - *extent_x* = [xmin, xmax] : set (cell) extent in x-direction
+            - *extent_y* = [ymin, ymax] : set (cell) extent in y-direction
             - *log* = True/False: create plot with log to base 10 (default: False)
             - *colorbar* = True/False : add colorbar to plot
             - *colorbar_label* = string : label of colorbar
@@ -2204,6 +2206,7 @@ class Shemat_file:
         dely = self.get_array("DELY")
         delz = self.get_array("DELZ")
         (dx, dy, dz) = self.get_model_extent()
+       
         from numpy import array, reshape, rot90, transpose
         if kwds.has_key('direction'):
             if kwds['direction'] == 'x':
@@ -2222,6 +2225,58 @@ class Shemat_file:
                 property_xy = array(property).reshape(jdim,idim)
         else:    
             property_xy = array(property).reshape(jdim,idim)#.transpose()
+                   
+        # adjust model extent if extent is set as keyword
+        if kwds.has_key("extent_x"):
+            xmin = kwds['extent_x'][0]
+            xmax = kwds['extent_x'][1]
+            delx = delx[xmin:xmax]
+            dx = np.sum(delx)
+            idim = len(delx)
+            update_dir = True
+        else:
+            xmin = 0
+            xmax = idim
+        if kwds.has_key("extent_y"):
+            ymin = kwds['extent_y'][0]
+            ymax = kwds['extent_y'][1]
+            dely = delx[ymin:ymax]
+            dy = np.sum(dely)
+            jdim = len(dely)
+            update_dir = True
+        else:
+            ymin = 0
+            ymax = jdim
+        if kwds.has_key("extent_z"):
+            zmin = kwds['extent_z'][0]
+            zmax = kwds['extent_z'][1]
+            dely = delx[zmin:zmax]
+            dz = np.sum(delz)
+            kdim = len(delz)
+            update_dir = True
+        else:
+            zmin = 0
+            zmax = kdim
+        # update property array if extent adjusted:
+        if update_dir:
+            if kwds.has_key('direction'):
+                if kwds['direction'] == 'x':
+                    property_xy = property_xy[zmin:zmax, ymin:ymax] # array(property).reshape(kdim,jdim)#.transpose()
+                    if kwds.has_key('vertical_ex'):
+                        pass
+                elif kwds['direction'] == 'y':
+                    property_xy = property_xy[zmin:zmax, xmin:xmax] # array(property).reshape(kdim,idim)
+                    if kwds.has_key('vertical_ex'):
+                        extent_h = sum(delx)/idim # real extent horizontal
+                        extent_v = sum(delz)/kdim # real extent vertical
+                        ratio_v = extent_v / extent_h * kwds['vertical_ex']
+                        print "Vertical Ex/ Aspect = %f" % ratio_v
+                    else: ratio_v = 1.
+                elif kwds['direction'] == 'z':
+                    property_xy = property_xy[ymin:ymax, xmin:xmax] # array(property).reshape(jdim,idim)
+            else:    
+                property_xy = property_xy[ymin:ymax, xmin:xmax] # array(property).reshape(jdim,idim)#.transpose()
+            
             
         # convert to log10?
         if kwds.has_key("log") and kwds['log']:
