@@ -1551,7 +1551,15 @@ class Shemat_file:
         self.origin_z = origin_z
 
     def get_model_origin(self):
-        """the model origin is not (or not correctly?) implemented in the
+        """Get default model origin (0,0,0)"""
+        self.origin_x = 0.
+        self.origin_y = 0. 
+        self.origin_z = 0.
+
+    def get_model_origin_cmd_line(self):
+        """Get model origin from command line
+        
+        The model origin is not (or not correctly?) implemented in the
         SHEMAT nml file itself - prompt user to input, if required!"""
         self.origin_x = float(raw_input("Model origin, x : "))
         self.origin_y = float(raw_input("Model origin, y : "))
