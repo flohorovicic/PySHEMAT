@@ -1583,33 +1583,39 @@ class Shemat_file:
         vmin = float : z-scale for image plot
         vmax = float
         aspect = float, 'auto', 'equal' : define aspect ratio of plot
-        contour = True/False: add contour lines"""
+        contour = True/False: add contour lines
+        
+        **For more plotting options: see self.create_section_property_plot documentation!**
+        
+        """
         print "create slice plot"
         property_xy = self.get_slice(property, direction, position)
         self.create_2D_property_plot(property_xy, direction=direction, **kwds)
 
 
     def create_section_property_plot(self,property,interpolation='nearest',**kwds):
-        """create a 2D plot of a property in a section,
+        """Create a 2D plot of a property in a section
+        
         for example for 2-D SHEMAT calculations within a section (VERTICAL setting, jdim=1)
         passed array should be 1-D, reshaping done in this method (with idim, kdim)
         standard plot: two images, 
         left image: raw data in (regular) cell structure
         right image: interpolated data (with interpolation passed as argument, see 
         matplotlib.imshow for possible values)
-        optional arguments:
-        title = 'Title'  Main title, if not given: name of array (to be implemented, now: no title)
-        colorbar = True/False : add colorbar to plot
-        colorbar_orientation = horizontal/ vertical : orientation of colorbar
-        two_plots = True/False : add a subplot with interpolated image
-        show = True/False : show plot
-        savefig = True/False : save figure to file
-        filename = string : figure filename
-        cmap = colormap name for image (cm.colormap)
-        vmin = float : z-scale for image plot
-        vmax = float
-        aspect = float, 'auto', 'equal' : define aspect ratio of plot
-        contour = True/False: add contour lines
+        
+        **Optional arguments**:
+            - *title* = 'Title'  Main title, if not given: name of array (to be implemented, now: no title)
+            - *colorbar* = True/False : add colorbar to plot
+            - *colorbar_orientation* = horizontal/ vertical : orientation of colorbar
+            two_plots = True/False : add a subplot with interpolated image
+            show = True/False : show plot
+            savefig = True/False : save figure to file
+            filename = string : figure filename
+            cmap = colormap name for image (cm.colormap)
+            vmin = float : z-scale for image plot
+            vmax = float
+            aspect = float, 'auto', 'equal' : define aspect ratio of plot
+            contour = True/False: add contour lines
         """ 
         # reshape data
         idim = int(self.get("IDIM"))
