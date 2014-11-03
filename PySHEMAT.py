@@ -2174,11 +2174,14 @@ class Shemat_file:
             - *cmap* = colormap name for image (cm.colormap)
             - *vmin* = float : z-scale for image plot
             - *vmax* = float
+            - *figsize* = (x_inches, y_inches) : set figurse size (standard Matplotlib notation)
             - *vertical_ex* = float : vertical exegeration, if set to 1: real aspect ratios
             - *xkcd* = True/False : create XKCD-style geeky plots - more for fun than publications
             - *ax* = matplotlib axis object : draw on this object
             - *fig* = matplotlib figure object : to add colorbar, etc. when axis is passed
         """ 
+        # evaluate optional keywords
+        figsize = kwds.get("figsize", (8,6))
         # reshape data
         idim = int(self.get("IDIM"))
         jdim = int(self.get("JDIM"))
@@ -2239,7 +2242,7 @@ class Shemat_file:
                 fig.subplots_adjust(wspace=0.3)
         else:
             if not kwds.has_key('ax'):
-                fig = plt.figure()
+                fig = plt.figure(figsize=figsize)
 #            if kwds.has_key('vertical_ex'):
 #                ax = fig.add_axes([0.2,0.2,0.6,0.6])
 #            else:
