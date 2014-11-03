@@ -2191,11 +2191,14 @@ class Shemat_file:
             - *vmin* = float : z-scale for image plot
             - *vmax* = float
             - *figsize* = (x_inches, y_inches) : set figurse size (standard Matplotlib notation)
+            - *fontsize* = pts : set font size of figure in points
             - *vertical_ex* = float : vertical exegeration, if set to 1: real aspect ratios
             - *xkcd* = True/False : create XKCD-style geeky plots - more for fun than publications
             - *ax* = matplotlib axis object : draw on this object
             - *fig* = matplotlib figure object : to add colorbar, etc. when axis is passed
         """ 
+        if kwds.has_key('fontsize'):
+            m.rcParams['font.size'] = kwds['fontsize']
         # evaluate optional keywords
         figsize = kwds.get("figsize", (8,6))
         # reshape data
