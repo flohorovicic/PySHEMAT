@@ -2163,6 +2163,7 @@ class Shemat_file:
             - *ylabel* = string : label of y-axis
             - *xscale* = 'meter', scale of x-axis (adjust tick labels)
             - *yscale* = 'meter', scale of y-axis (adjust tick labels)
+            - *log* = True/False: create plot with log to base 10 (default: False)
             - *colorbar* = True/False : add colorbar to plot
             - *colorbar_label* = string : label of colorbar
             - *colorbar_orientation* = horizontal/ vertical
@@ -2204,6 +2205,11 @@ class Shemat_file:
                 property_xy = array(property).reshape(jdim,idim)
         else:    
             property_xy = array(property).reshape(jdim,idim)#.transpose()
+            
+        # convert to log10?
+        if kwds.has_key("log") and kwds['log']:
+            property_xy = np.log10(property_xy)
+            
         #
         #
         # T O   C H E C K!!!!
